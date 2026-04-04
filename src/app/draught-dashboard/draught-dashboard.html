@@ -1,0 +1,57 @@
+<div class="dashboard-header">
+  <h1 class="mat-headline-3">Dự báo xác suất xuất hiện hạn hán</h1>
+  <!-- <p class="mat-body-1">Real-time forecasting and metrics.</p> -->
+</div>
+
+<div class="dashboard-grid">
+  <!-- Map Card -->
+  <mat-card class="dashboard-card map-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar color="primary">map</mat-icon>
+      <mat-card-title>Bản đồ hạn hán</mat-card-title>
+      <mat-card-subtitle>Việt Nam</mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content class="map-container-wrapper">
+      <div id="vietnamMap" class="leaflet-map-container"></div>
+      <div *ngIf="mouseLocation" class="live-coords-overlay">
+        <span class="coord-item"><strong>Vĩ độ:</strong> {{ mouseLocation.lat | number:'1.4-4' }}</span>
+        <span class="coord-divider">|</span>
+        <span class="coord-item"><strong>Kinh độ:</strong> {{ mouseLocation.lng | number:'1.4-4' }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Location Info Card -->
+  <mat-card class="dashboard-card info-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar color="accent">location_on</mat-icon>
+      <mat-card-title>Thông tin vị trí</mat-card-title>
+      <mat-card-subtitle>Chi tiết tọa độ được chọn</mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content class="info-card-content">
+      <div *ngIf="selectedLocation; else noLocation" class="location-details">
+        <div class="detail-row" *ngIf="selectedProvinceName">
+          <div class="detail-label">Tỉnh / Thành phố</div>
+          <div class="detail-value province-name">{{ selectedProvinceName }}</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Vĩ độ</div>
+          <div class="detail-value">{{ selectedLocation.lat | number:'1.4-4' }}°</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Kinh độ</div>
+          <div class="detail-value">{{ selectedLocation.lng | number:'1.4-4' }}°</div>
+        </div>
+      </div>
+      <ng-template #noLocation>
+        <div class="empty-state">
+          <mat-icon>touch_app</mat-icon>
+          <p>Nhấp vào bản đồ để xem thông tin chi tiết</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+
+</div>

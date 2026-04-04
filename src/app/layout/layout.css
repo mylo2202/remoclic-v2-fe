@@ -1,0 +1,65 @@
+.app-sidenav-container {
+  height: 100vh;
+  margin: 0;
+}
+
+.app-sidenav {
+  width: 260px;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidenav-header {
+  padding: 24px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidenav-header h2 {
+  margin: 0;
+  font-weight: 500;
+  color: #38bdf8; /* light blue brand color */
+  letter-spacing: 0.5px;
+}
+
+/* Override inner text and icons for dark sidebar */
+::ng-deep .app-sidenav .mdc-list-item__primary-text {
+  color: #cbd5e1 !important; 
+  font-weight: 500;
+}
+
+::ng-deep .app-sidenav .mat-icon {
+  color: #94a3b8 !important;
+}
+
+/* Interactive States */
+::ng-deep .app-sidenav .mat-mdc-list-item {
+  margin: 4px 8px;
+  border-radius: 8px;
+  width: auto;
+  transition: all 0.2s ease;
+}
+
+::ng-deep .app-sidenav .mdc-list-item--activated {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+::ng-deep .app-sidenav .mdc-list-item--activated .mdc-list-item__primary-text {
+  color: #ffffff !important;
+}
+
+::ng-deep .app-sidenav .mdc-list-item--activated .mat-icon {
+  color: #38bdf8 !important; /* Brighter accent for active icon */
+}
+
+::ng-deep .app-sidenav .mat-mdc-list-item:hover:not(.mdc-list-item--activated) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.content-container {
+  padding: 24px;
+}
