@@ -234,7 +234,17 @@
   pointer-events: none;
   /* Don't interfere with map interaction */
   border: 1px solid rgba(0, 0, 0, 0.05);
-  animation: fadeIn 0.2s ease-out;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.live-coords-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .coord-item strong {
@@ -245,18 +255,6 @@
 .coord-divider {
   color: #cbd5e1;
   font-weight: 300;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .spinning {

@@ -26,15 +26,16 @@ export class DraughtDashboard implements AfterViewInit {
   selectedLocation: { lat: number; lng: number } | null = null;
   selectedProvinceName: string | null = null;
   mouseLocation: { lat: number; lng: number } | null = null;
+  isMouseOnMap: boolean = false;
   currentZoom: number = 6;
 
   isLoadingForecast: boolean = false;
   private forecastChart: Chart | undefined;
 
   borderColorMild = '#fbbf24';
-  backgroundColorMild = 'rgba(251, 191, 36, 0.4)';
+  backgroundColorMild = 'rgba(251, 191, 36, 0.6)';
   borderColorModerate = '#f97316';
-  backgroundColorModerate = 'rgba(249, 115, 22, 0.5)';
+  backgroundColorModerate = 'rgba(249, 115, 22, 0.6)';
   borderColorSevere = '#dc2626';
   backgroundColorSevere = 'rgba(220, 38, 38, 0.6)';
   fill = true;
@@ -150,11 +151,12 @@ export class DraughtDashboard implements AfterViewInit {
 
     this.map.on('mousemove', (e: L.LeafletMouseEvent) => {
       this.mouseLocation = { lat: e.latlng.lat, lng: e.latlng.lng };
+      this.isMouseOnMap = true;
       this.cdr.detectChanges();
     });
 
     this.map.on('mouseout', () => {
-      this.mouseLocation = null;
+      this.isMouseOnMap = false;
       this.cdr.detectChanges();
     });
 
@@ -166,6 +168,10 @@ export class DraughtDashboard implements AfterViewInit {
   }
 
   private updateSelection(latlng: L.LatLng, provinceName: string | null = null): void {
+    if (!provinceName) {
+      return;
+    }
+
     this.selectedLocation = { lat: latlng.lat, lng: latlng.lng };
     this.selectedProvinceName = provinceName;
 
@@ -196,7 +202,7 @@ export class DraughtDashboard implements AfterViewInit {
               data: response.data.mild,
               borderColor: this.borderColorMild,
               backgroundColor: this.backgroundColorMild,
-              fill: this.fill,
+              fill: 1, // Fill space between this dataset and Moderate
               tension: this.tension
             },
             {
@@ -204,7 +210,7 @@ export class DraughtDashboard implements AfterViewInit {
               data: response.data.mord,
               borderColor: this.borderColorModerate,
               backgroundColor: this.backgroundColorModerate,
-              fill: this.fill,
+              fill: 2, // Fill space between this dataset and Severe
               tension: this.tension
             },
             {
@@ -212,7 +218,7 @@ export class DraughtDashboard implements AfterViewInit {
               data: response.data.seve,
               borderColor: this.borderColorSevere,
               backgroundColor: this.backgroundColorSevere,
-              fill: this.fill,
+              fill: 'origin', // Fill space to the 0-axis
               tension: this.tension
             }
           ]

@@ -14,10 +14,10 @@
     <mat-divider></mat-divider>
     <mat-card-content class="map-container-wrapper">
       <div id="vietnamMap" class="leaflet-map-container"></div>
-      <div *ngIf="mouseLocation" class="live-coords-overlay">
-        <span class="coord-item"><strong>Vĩ độ:</strong> {{ mouseLocation.lat | number:'1.4-4' }}</span>
+      <div class="live-coords-overlay" [class.show]="isMouseOnMap">
+        <span class="coord-item"><strong>Vĩ độ:</strong> {{ mouseLocation?.lat | number:'1.4-4' }}</span>
         <span class="coord-divider">|</span>
-        <span class="coord-item"><strong>Kinh độ:</strong> {{ mouseLocation.lng | number:'1.4-4' }}</span>
+        <span class="coord-item"><strong>Kinh độ:</strong> {{ mouseLocation?.lng | number:'1.4-4' }}</span>
       </div>
     </mat-card-content>
   </mat-card>
@@ -67,9 +67,9 @@
         <mat-icon class="spinning">sync</mat-icon>
         <p>Đang tải dữ liệu dự báo...</p>
       </div>
-      
+
       <canvas id="forecastChart" [hidden]="!selectedLocation || isLoadingForecast"></canvas>
-      
+
       <div *ngIf="!selectedLocation && !isLoadingForecast" class="chart-placeholder">
         <mat-icon>query_stats</mat-icon>
         <p>Chọn một vị trí trên bản đồ để xem biểu đồ dự báo</p>
