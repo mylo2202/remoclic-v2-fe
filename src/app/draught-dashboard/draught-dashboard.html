@@ -54,4 +54,27 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- Forecast Chart Card -->
+  <mat-card class="dashboard-card chart-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar color="primary">show_chart</mat-icon>
+      <mat-card-title>Dự báo hạn hán 6 tháng</mat-card-title>
+      <mat-card-subtitle>Xác suất xuất hiện theo thời gian</mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content class="chart-container-wrapper">
+      <div *ngIf="isLoadingForecast" class="chart-loading-overlay">
+        <mat-icon class="spinning">sync</mat-icon>
+        <p>Đang tải dữ liệu dự báo...</p>
+      </div>
+      
+      <canvas id="forecastChart" [hidden]="!selectedLocation || isLoadingForecast"></canvas>
+      
+      <div *ngIf="!selectedLocation && !isLoadingForecast" class="chart-placeholder">
+        <mat-icon>query_stats</mat-icon>
+        <p>Chọn một vị trí trên bản đồ để xem biểu đồ dự báo</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
 </div>

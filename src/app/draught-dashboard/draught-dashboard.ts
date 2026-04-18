@@ -4,13 +4,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import * as L from 'leaflet';
+import { ForecastService } from '../services/forecast.service';
 import 'leaflet.vectorgrid';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'draught-dashboard',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatDividerModule],
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatDividerModule, HttpClientModule],
   templateUrl: './draught-dashboard.html',
   styleUrl: './draught-dashboard.css',
 })
@@ -23,7 +28,19 @@ export class DraughtDashboard implements AfterViewInit {
   mouseLocation: { lat: number; lng: number } | null = null;
   currentZoom: number = 6;
 
-  constructor(private readonly cdr: ChangeDetectorRef) {}
+  isLoadingForecast: boolean = false;
+  private forecastChart: Chart | undefined;
+
+  borderColorMild = '#fbbf24';
+  backgroundColorMild = 'rgba(251, 191, 36, 0.4)';
+  borderColorModerate = '#f97316';
+  backgroundColorModerate = 'rgba(249, 115, 22, 0.5)';
+  borderColorSevere = '#dc2626';
+  backgroundColorSevere = 'rgba(220, 38, 38, 0.6)';
+  fill = true;
+  tension = 0;
+
+  constructor(private readonly cdr: ChangeDetectorRef, private readonly forecastService: ForecastService) { }
 
   ngAfterViewInit() {
     this.initMap();
@@ -160,5 +177,113 @@ export class DraughtDashboard implements AfterViewInit {
 
     // Trigger Angular change detection manually because Leaflet runs outside Angular's Zone.
     this.cdr.detectChanges();
+
+    // Fetch forecast data whenever selection changes
+    this.fetchForecastData(latlng.lat, latlng.lng);
+  }
+
+  private fetchForecastData(lat: number, lng: number): void {
+    this.isLoadingForecast = true;
+    this.cdr.detectChanges();
+
+    this.forecastService.getForecast(lat, lng).subscribe({
+      next: (response) => {
+        const chartData = {
+          labels: response.labels,
+          datasets: [
+            {
+              label: 'Hạn nhẹ (Mild)',
+              data: response.data.mild,
+              borderColor: this.borderColorMild,
+              backgroundColor: this.backgroundColorMild,
+              fill: this.fill,
+              tension: this.tension
+            },
+            {
+              label: 'Hạn vừa (Moderate)',
+              data: response.data.mord,
+              borderColor: this.borderColorModerate,
+              backgroundColor: this.backgroundColorModerate,
+              fill: this.fill,
+              tension: this.tension
+            },
+            {
+              label: 'Hạn nặng (Severe)',
+              data: response.data.seve,
+              borderColor: this.borderColorSevere,
+              backgroundColor: this.backgroundColorSevere,
+              fill: this.fill,
+              tension: this.tension
+            }
+          ]
+        };
+
+        this.updateChart(chartData);
+        this.isLoadingForecast = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching forecast data:', err);
+        this.isLoadingForecast = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private updateChart(data: any): void {
+    const ctx = document.getElementById('forecastChart') as HTMLCanvasElement;
+    if (!ctx) return;
+
+    if (this.forecastChart) {
+      this.forecastChart.data.labels = data.labels;
+      this.forecastChart.data.datasets = data.datasets;
+      this.forecastChart.update();
+    } else {
+      this.forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: (context) => {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.y !== null) {
+                    label += context.parsed.y.toFixed(1) + '%';
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Xác suất (%)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Dự báo cho 6 tháng tới'
+              }
+            }
+          }
+        }
+      });
+    }
   }
 }
