@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  remoclic-fe:
+    image: remoclic-fe:latest
+    container_name: remoclic-fe
+    ports:
+      - "8080:80"
+    restart: always
+    environment:
+      - BACKEND_URL=http://host.docker.internal:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

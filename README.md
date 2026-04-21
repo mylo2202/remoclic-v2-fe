@@ -57,3 +57,26 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Docker Deployment
+
+To build and run the application using Docker, use the following commands:
+
+### Build the Docker image
+```bash
+docker build -t remoclic-fe:latest .
+```
+
+### Run the Docker container
+```bash
+docker compose up -d
+```
+
+### Access the application
+Open your browser and navigate to `http://localhost:8080`.
+
+### Stop and remove the container
+```bash
+docker compose down
+docker rm remoclic-fe
+```
