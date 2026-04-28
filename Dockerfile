@@ -29,5 +29,8 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 # Expose port 80
 EXPOSE 80
 
+# Only substitute BACKEND_URL in templates to avoid breaking Nginx variables like $uri
+ENV NGINX_ENVSUBST_FILTER=BACKEND_URL
+
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
