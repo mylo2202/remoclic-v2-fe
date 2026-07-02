@@ -95,15 +95,11 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
   private loadRefDates(): void {
     this.isLoadingRefDates = true;
     this.forecastService.getRefDates().subscribe({
-      next: (res: any) => {
+      next: (res) => {
         // API returns strings like '2026-05-01'
-        if (Array.isArray(res)) {
-          this.availableRefDates = res
-            .map((d: any) => new Date(typeof d === 'string' ? d : String(d)))
-            .filter((d) => !isNaN(d.getTime()));
-        } else {
-          this.availableRefDates = [];
-        }
+        this.availableRefDates = res
+          .map((date) => new Date(date))
+          .filter((date) => !Number.isNaN(date.getTime()));
         // Pre-select the first (latest) available date
         if (this.availableRefDates.length > 0) {
           this.selectedRefDate = this.availableRefDates[0];
