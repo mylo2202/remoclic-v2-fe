@@ -13,13 +13,18 @@ export class DraughtForecastService {
   private readonly probabilityForecastUrl = `${environment.apiUrl}/draught/probability-forecast`;
   private readonly eventForecastUrl = `${environment.apiUrl}/draught/event-forecast`;
 
-  constructor(private readonly http: HttpClient) { }
+  constructor(private readonly http: HttpClient) {}
 
-  getRefDates(): Observable<any> {
-    return this.http.get(this.refDateUrl);
+  getRefDates(): Observable<string[]> {
+    return this.http.get<string[]>(this.refDateUrl);
   }
 
-  getProbabilityForecast(lat: number, lng: number, timescale?: number, refDate?: string): Observable<DraughtProbabilityForecastResponse> {
+  getProbabilityForecast(
+    lat: number,
+    lng: number,
+    timescale?: number,
+    refDate?: string,
+  ): Observable<DraughtProbabilityForecastResponse> {
     const params: any = { lat, lng };
     if (timescale !== undefined) {
       params.timescale = timescale;
@@ -32,7 +37,12 @@ export class DraughtForecastService {
     });
   }
 
-  getEventForecast(lat: number, lng: number, timescale?: number, refDate?: string): Observable<DraughtEventForecastResponse> {
+  getEventForecast(
+    lat: number,
+    lng: number,
+    timescale?: number,
+    refDate?: string,
+  ): Observable<DraughtEventForecastResponse> {
     const params: any = { lat, lng };
     if (timescale !== undefined) {
       params.timescale = timescale;
