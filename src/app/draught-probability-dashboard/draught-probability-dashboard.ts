@@ -5,21 +5,45 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/material/core';
 import * as L from 'leaflet';
-import { ForecastService } from '../services/forecast.service';
+import { DraughtForecastService } from '../services/draught-forecast.service';
 import 'leaflet.vectorgrid';
 import { Chart, registerables } from 'chart.js';
+import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
+import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
 
 Chart.register(...registerables);
 
+
 @Component({
-  selector: 'draught-dashboard',
+  selector: 'draught-probability-dashboard',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, MatDividerModule, HttpClientModule],
-  templateUrl: './draught-dashboard.html',
-  styleUrl: './draught-dashboard.css',
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDividerModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
+  ],
+  providers: [
+    { provide: DateAdapter, useClass: ViDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: VI_MONTH_DATE_FORMATS },
+  ],
+  templateUrl: './draught-probability-dashboard.html',
+  styleUrl: './draught-probability-dashboard.css',
 })
-export class DraughtDashboard implements AfterViewInit {
+export class DraughtProbabilityDashboard implements AfterViewInit {
   private map: L.Map | undefined;
   private selectedMarker: L.Marker | undefined;
 
@@ -28,6 +52,23 @@ export class DraughtDashboard implements AfterViewInit {
   mouseLocation: { lat: number; lng: number } | null = null;
   isMouseOnMap: boolean = false;
   currentZoom: number = 6;
+  selectedTimescale: number = 1;
+
+  availableRefDates: Date[] = []; // parsed Date objects from API
+  selectedRefDate: Date | null = null; // currently selected month
+  refDateControl = new FormControl<Date | null>(null);
+  isLoadingRefDates: boolean = false;
+
+  /** Reference to the custom header — passed to [calendarHeaderComponent] */
+  readonly monthPickerHeader = MonthPickerHeaderComponent;
+
+  /** Only allow months that exist in availableRefDates */
+  refDateFilter = (date: Date | null): boolean => {
+    if (!date) return false;
+    return this.availableRefDates.some(
+      (d) => d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth(),
+    );
+  };
 
   isLoadingForecast: boolean = false;
   private forecastChart: Chart | undefined;
@@ -41,10 +82,42 @@ export class DraughtDashboard implements AfterViewInit {
   fill = true;
   tension = 0;
 
-  constructor(private readonly cdr: ChangeDetectorRef, private readonly forecastService: ForecastService) { }
+  constructor(
+    private readonly cdr: ChangeDetectorRef,
+    private readonly forecastService: DraughtForecastService,
+  ) {}
 
   ngAfterViewInit() {
     this.initMap();
+    this.loadRefDates();
+  }
+
+  private loadRefDates(): void {
+    this.isLoadingRefDates = true;
+    this.forecastService.getRefDates().subscribe({
+      next: (res: any) => {
+        // API returns strings like '2026-05-01'
+        if (Array.isArray(res)) {
+          this.availableRefDates = res
+            .map((d: any) => new Date(typeof d === 'string' ? d : String(d)))
+            .filter((d) => !isNaN(d.getTime()));
+        } else {
+          this.availableRefDates = [];
+        }
+        // Pre-select the first (latest) available date
+        if (this.availableRefDates.length > 0) {
+          this.selectedRefDate = this.availableRefDates[0];
+          this.refDateControl.setValue(this.selectedRefDate);
+        }
+        this.isLoadingRefDates = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching ref dates:', err);
+        this.isLoadingRefDates = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   private initMap(): void {
@@ -188,52 +261,79 @@ export class DraughtDashboard implements AfterViewInit {
     this.fetchForecastData(latlng.lat, latlng.lng);
   }
 
+  onTimescaleRadioChange(value: number): void {
+    this.selectedTimescale = value;
+    if (this.selectedLocation) {
+      this.fetchForecastData(this.selectedLocation.lat, this.selectedLocation.lng);
+    }
+  }
+
+  /** Called when user picks a month in the datepicker popup */
+  onMonthSelected(date: Date, picker: any): void {
+    this.selectedRefDate = date;
+    this.refDateControl.setValue(date);
+    picker.close();
+    if (this.selectedLocation) {
+      this.fetchForecastData(this.selectedLocation.lat, this.selectedLocation.lng);
+    }
+  }
+
+  /** Format selectedRefDate as yyyy-MM-dd for the API */
+  private get selectedRefDateForApi(): string | undefined {
+    if (!this.selectedRefDate) return undefined;
+    const y = this.selectedRefDate.getFullYear();
+    const m = String(this.selectedRefDate.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}-01`;
+  }
+
   private fetchForecastData(lat: number, lng: number): void {
     this.isLoadingForecast = true;
     this.cdr.detectChanges();
 
-    this.forecastService.getForecast(lat, lng).subscribe({
-      next: (response) => {
-        const chartData = {
-          labels: response.labels,
-          datasets: [
-            {
-              label: 'Hạn nhẹ (Mild)',
-              data: response.data.mild,
-              borderColor: this.borderColorMild,
-              backgroundColor: this.backgroundColorMild,
-              fill: 1, // Fill space between this dataset and Moderate
-              tension: this.tension
-            },
-            {
-              label: 'Hạn vừa (Moderate)',
-              data: response.data.mord,
-              borderColor: this.borderColorModerate,
-              backgroundColor: this.backgroundColorModerate,
-              fill: 2, // Fill space between this dataset and Severe
-              tension: this.tension
-            },
-            {
-              label: 'Hạn nặng (Severe)',
-              data: response.data.seve,
-              borderColor: this.borderColorSevere,
-              backgroundColor: this.backgroundColorSevere,
-              fill: 'origin', // Fill space to the 0-axis
-              tension: this.tension
-            }
-          ]
-        };
+    this.forecastService
+      .getProbabilityForecast(lat, lng, this.selectedTimescale, this.selectedRefDateForApi)
+      .subscribe({
+        next: (response) => {
+          const chartData = {
+            labels: response.labels,
+            datasets: [
+              {
+                label: 'Hạn nhẹ (Mild)',
+                data: response.data.mild,
+                borderColor: this.borderColorMild,
+                backgroundColor: this.backgroundColorMild,
+                fill: 1, // Fill space between this dataset and Moderate
+                tension: this.tension,
+              },
+              {
+                label: 'Hạn vừa (Moderate)',
+                data: response.data.mord,
+                borderColor: this.borderColorModerate,
+                backgroundColor: this.backgroundColorModerate,
+                fill: 2, // Fill space between this dataset and Severe
+                tension: this.tension,
+              },
+              {
+                label: 'Hạn nặng (Severe)',
+                data: response.data.seve,
+                borderColor: this.borderColorSevere,
+                backgroundColor: this.backgroundColorSevere,
+                fill: 'origin', // Fill space to the 0-axis
+                tension: this.tension,
+              },
+            ],
+          };
 
-        this.updateChart(chartData);
-        this.isLoadingForecast = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error fetching forecast data:', err);
-        this.isLoadingForecast = false;
-        this.cdr.detectChanges();
-      }
-    });
+          this.updateChart(chartData);
+          this.isLoadingForecast = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error fetching forecast data:', err);
+          this.isLoadingForecast = false;
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   private updateChart(data: any): void {
@@ -268,9 +368,9 @@ export class DraughtDashboard implements AfterViewInit {
                     label += context.parsed.y.toFixed(1) + '%';
                   }
                   return label;
-                }
-              }
-            }
+                },
+              },
+            },
           },
           scales: {
             y: {
@@ -278,17 +378,17 @@ export class DraughtDashboard implements AfterViewInit {
               max: 100,
               title: {
                 display: true,
-                text: 'Xác suất (%)'
-              }
+                text: 'Xác suất (%)',
+              },
             },
             x: {
               title: {
                 display: true,
-                text: 'Dự báo cho 6 tháng tới'
-              }
-            }
-          }
-        }
+                text: 'Dự báo cho 6 tháng tới',
+              },
+            },
+          },
+        },
       });
     }
   }

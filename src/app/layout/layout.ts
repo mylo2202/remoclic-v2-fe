@@ -23,7 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class Layout {
   isSidenavOpened = signal(true);
 
-  toggleSidenav() {
-    this.isSidenavOpened.set(!this.isSidenavOpened());
-  }
+  // toggleSidenav() {
+  //   this.isSidenavOpened.set(!this.isSidenavOpened());
+  // }
 }

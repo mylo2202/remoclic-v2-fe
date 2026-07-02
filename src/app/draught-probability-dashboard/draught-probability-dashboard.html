@@ -1,0 +1,134 @@
+<div class="dashboard-header">
+  <h1 class="mat-headline-5">Dự báo xác suất xuất hiện hạn theo các cấp và quy mô thời gian</h1>
+</div>
+
+<div class="dashboard-grid">
+  <!-- Map Card -->
+  <mat-card class="dashboard-card map-card">
+    <mat-card-header>
+      <mat-card-title>Bản đồ</mat-card-title>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content class="map-container-wrapper">
+      <div id="vietnamMap" class="leaflet-map-container"></div>
+      <div class="live-coords-overlay" [class.show]="isMouseOnMap">
+        <span class="coord-item"><strong>Vĩ độ:</strong> {{ mouseLocation?.lat | number:'1.4-4' }}</span>
+        <span class="coord-divider">|</span>
+        <span class="coord-item"><strong>Kinh độ:</strong> {{ mouseLocation?.lng | number:'1.4-4' }}</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Right Column -->
+  <div class="right-column">
+    <!-- Location Info Card -->
+    <mat-card class="dashboard-card info-card">
+      <mat-card-header>
+        <mat-card-title>Thông tin vị trí</mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="info-card-content">
+        <div *ngIf="selectedLocation; else noLocation" class="location-details">
+          <div class="detail-row" *ngIf="selectedProvinceName">
+            <div class="detail-label">Tỉnh / Thành phố</div>
+            <div class="detail-value province-name">{{ selectedProvinceName }}</div>
+          </div>
+          <div class="coords-row">
+            <div class="detail-row">
+              <div class="detail-label">Vĩ độ</div>
+              <div class="detail-value">{{ selectedLocation.lat | number:'1.4-4' }}°</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Kinh độ</div>
+              <div class="detail-value">{{ selectedLocation.lng | number:'1.4-4' }}°</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noLocation>
+          <div class="empty-state">
+            <mat-icon>touch_app</mat-icon>
+            <p>Nhấp vào bản đồ để xem thông tin chi tiết</p>
+          </div>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Timescale Selection Card -->
+    <mat-card class="dashboard-card timescale-card">
+      <mat-card-header>
+        <mat-card-title>Tùy chọn</mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="timescale-card-content">
+
+        <!-- Quy mô thời gian -->
+        <div class="option-group">
+          <span class="option-label">Quy mô thời gian</span>
+          <div class="timescale-radio-group">
+            <label class="timescale-radio-label">
+              <input type="radio" name="timescale" [value]="1" [checked]="selectedTimescale === 1"
+                (change)="onTimescaleRadioChange(1)">
+              1 tháng
+            </label>
+            <label class="timescale-radio-label">
+              <input type="radio" name="timescale" [value]="3" [checked]="selectedTimescale === 3"
+                (change)="onTimescaleRadioChange(3)">
+              3 tháng
+            </label>
+            <label class="timescale-radio-label">
+              <input type="radio" name="timescale" [value]="6" [checked]="selectedTimescale === 6"
+                (change)="onTimescaleRadioChange(6)">
+              6 tháng
+            </label>
+          </div>
+        </div>
+
+        <!-- Thời điểm dự báo -->
+        <div class="option-group">
+          <span class="option-label">Thời điểm dự báo</span>
+          <div *ngIf="isLoadingRefDates" class="ref-date-loading">
+            <mat-icon class="spinning" style="font-size:16px;width:16px;height:16px;">sync</mat-icon>
+            <span>Đang tải...</span>
+          </div>
+          <div *ngIf="!isLoadingRefDates">
+            <mat-form-field class="ref-date-field" appearance="outline" subscriptSizing="dynamic">
+              <input matInput [matDatepicker]="refDatePicker" [formControl]="refDateControl"
+                [matDatepickerFilter]="refDateFilter" readonly>
+              <mat-datepicker-toggle matIconSuffix [for]="refDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #refDatePicker startView="year"
+                [calendarHeaderComponent]="monthPickerHeader"
+                (monthSelected)="onMonthSelected($event, refDatePicker)"></mat-datepicker>
+            </mat-form-field>
+            <span *ngIf="availableRefDates.length === 0" class="ref-date-empty">
+              Không có dữ liệu
+            </span>
+          </div>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+
+    <!-- Forecast Chart Card -->
+    <mat-card class="dashboard-card chart-card">
+      <mat-card-header>
+        <mat-card-title>Biểu đồ dự báo 6 tháng</mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="chart-container-wrapper">
+        <div *ngIf="isLoadingForecast" class="chart-loading-overlay">
+          <mat-icon class="spinning">sync</mat-icon>
+          <p>Đang tải dữ liệu dự báo...</p>
+        </div>
+
+        <canvas id="forecastChart" [hidden]="!selectedLocation || isLoadingForecast"></canvas>
+
+        <div *ngIf="!selectedLocation && !isLoadingForecast" class="chart-placeholder">
+          <mat-icon>query_stats</mat-icon>
+          <p>Chọn một vị trí trên bản đồ để xem biểu đồ dự báo</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

@@ -6,19 +6,19 @@
     <mat-nav-list>
       <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link">
         <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle>Dự báo hạn hán</span>
+        <span matListItemTitle>Dự báo xác suất hạn</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
+    <!-- <mat-toolbar color="primary">
       <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle sidenav">
         <mat-icon>menu</mat-icon>
       </button>
       <span>REgional climate MOdeling and CLImate Change 2.0</span>
       <span class="toolbar-spacer"></span>
-    </mat-toolbar>
+    </mat-toolbar> -->
     <main class="content-container">
       <router-outlet></router-outlet>
     </main>
