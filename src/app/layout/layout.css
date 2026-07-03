@@ -8,6 +8,11 @@
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
   color: white;
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+
+  a.active-link {
+    background-color: #0f317c;
+    font-weight: 600;
+  }
 }
 
 .sidenav-header {
@@ -25,7 +30,7 @@
 
 /* Override inner text and icons for dark sidebar */
 ::ng-deep .app-sidenav .mdc-list-item__primary-text {
-  color: #cbd5e1 !important; 
+  color: #cbd5e1 !important;
   font-weight: 500;
 }
 
@@ -62,4 +67,8 @@
 
 .content-container {
   padding: 24px;
+}
+
+.sidenav-item-label {
+  font-size: 14px;
 }

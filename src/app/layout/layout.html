@@ -1,14 +1,14 @@
 <mat-sidenav-container class="app-sidenav-container">
   <mat-sidenav #sidenav [opened]="isSidenavOpened()" mode="side" class="app-sidenav">
     <div class="sidenav-header">
-      <h2>REMOCLIC 2.0</h2>
+      <h2>Hệ thống dự báo hạn hán và khí hậu</h2>
     </div>
     <mat-nav-list>
       <a mat-list-item routerLink="/draught-probability-dashboard" routerLinkActive="active-link">
-        <span matListItemTitle>Dự báo xác suất xuất hiện hạn</span>
+        <span class="sidenav-item-label" matListItemTitle>Dự báo xác suất xuất hiện hạn</span>
       </a>
       <a mat-list-item routerLink="/draught-event-dashboard" routerLinkActive="active-link">
-        <span matListItemTitle>Dự báo sự kiện hạn</span>
+        <span class="sidenav-item-label" matListItemTitle>Dự báo sự kiện hạn</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>
