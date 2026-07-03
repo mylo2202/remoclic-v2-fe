@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Injector, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,17 +11,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/material/core';
 import * as L from 'leaflet';
-import { DraughtForecastService } from '../services/draught-forecast.service';
 import 'leaflet.vectorgrid';
 import { Chart, registerables } from 'chart.js';
 import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
 import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
+import { DashboardConfig } from '../models/dashboard-config.model';
+import { DRAUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../constants/draught-probability-dashboard.config';
 
 Chart.register(...registerables);
 
-
 @Component({
-  selector: 'draught-probability-dashboard',
+  selector: 'main-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -40,12 +40,20 @@ Chart.register(...registerables);
     { provide: DateAdapter, useClass: ViDateAdapter },
     { provide: MAT_DATE_FORMATS, useValue: VI_MONTH_DATE_FORMATS },
   ],
-  templateUrl: './draught-probability-dashboard.html',
-  styleUrl: './draught-probability-dashboard.css',
+  templateUrl: './main-dashboard.component.html',
+  styleUrl: './main-dashboard.component.css',
 })
-export class DraughtProbabilityDashboard implements AfterViewInit {
+export class MainDashboard implements AfterViewInit {
+  // defaults to draught probability
+  @Input() config: DashboardConfig = DRAUGHT_PROBABILITY_DASHBOARD_CONFIG;
+
   private map: L.Map | undefined;
   private selectedMarker: L.Marker | undefined;
+
+
+  /** Unique ID for the canvas element — prevents DOM conflicts when both routes are cached */
+  readonly canvasId = `forecastChart-${Math.random().toString(36).slice(2)}`;
+  readonly mapId = `vietnamMap-${Math.random().toString(36).slice(2)}`;
 
   selectedLocation: { lat: number; lng: number } | null = null;
   selectedProvinceName: string | null = null;
@@ -73,19 +81,10 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
   isLoadingForecast: boolean = false;
   private forecastChart: Chart | undefined;
 
-  borderColorMild = '#fbbf24';
-  backgroundColorMild = 'rgba(251, 191, 36, 0.6)';
-  borderColorModerate = '#f97316';
-  backgroundColorModerate = 'rgba(249, 115, 22, 0.6)';
-  borderColorSevere = '#dc2626';
-  backgroundColorSevere = 'rgba(220, 38, 38, 0.6)';
-  fill = true;
-  tension = 0;
-
   constructor(
     private readonly cdr: ChangeDetectorRef,
-    private readonly forecastService: DraughtForecastService,
-  ) {}
+    private readonly injector: Injector,
+  ) { }
 
   ngAfterViewInit() {
     this.initMap();
@@ -93,8 +92,14 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
   }
 
   private loadRefDates(): void {
+    if (!this.config.fetchRefDates) {
+      this.isLoadingRefDates = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.isLoadingRefDates = true;
-    this.forecastService.getRefDates().subscribe({
+    this.config.fetchRefDates(this.injector).subscribe({
       next: (res) => {
         // API returns strings like '2026-05-01'
         this.availableRefDates = res
@@ -128,7 +133,7 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
     });
 
     // Initialize map centered roughly on Vietnam
-    this.map = L.map('vietnamMap', {
+    this.map = L.map(this.mapId, {
       minZoom: 5,
       maxZoom: 9,
     }).setView([16, 112], 5);
@@ -286,40 +291,11 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
     this.isLoadingForecast = true;
     this.cdr.detectChanges();
 
-    this.forecastService
-      .getProbabilityForecast(lat, lng, this.selectedTimescale, this.selectedRefDateForApi)
+    this.config
+      .fetchData(this.injector, lat, lng, this.selectedTimescale, this.selectedRefDateForApi)
       .subscribe({
         next: (response) => {
-          const chartData = {
-            labels: response.labels,
-            datasets: [
-              {
-                label: 'Hạn nhẹ (Mild)',
-                data: response.data.mild,
-                borderColor: this.borderColorMild,
-                backgroundColor: this.backgroundColorMild,
-                fill: 1, // Fill space between this dataset and Moderate
-                tension: this.tension,
-              },
-              {
-                label: 'Hạn vừa (Moderate)',
-                data: response.data.mord,
-                borderColor: this.borderColorModerate,
-                backgroundColor: this.backgroundColorModerate,
-                fill: 2, // Fill space between this dataset and Severe
-                tension: this.tension,
-              },
-              {
-                label: 'Hạn nặng (Severe)',
-                data: response.data.seve,
-                borderColor: this.borderColorSevere,
-                backgroundColor: this.backgroundColorSevere,
-                fill: 'origin', // Fill space to the 0-axis
-                tension: this.tension,
-              },
-            ],
-          };
-
+          const chartData = this.config.transformData(response);
           this.updateChart(chartData);
           this.isLoadingForecast = false;
           this.cdr.detectChanges();
@@ -332,8 +308,9 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
       });
   }
 
+
   private updateChart(data: any): void {
-    const ctx = document.getElementById('forecastChart') as HTMLCanvasElement;
+    const ctx = document.getElementById(this.canvasId) as HTMLCanvasElement;
     if (!ctx) return;
 
     if (this.forecastChart) {
@@ -361,7 +338,7 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
                     label += ': ';
                   }
                   if (context.parsed.y !== null) {
-                    label += context.parsed.y.toFixed(1) + '%';
+                    label += this.config.valueFormatter(context.parsed.y);
                   }
                   return label;
                 },
@@ -371,10 +348,11 @@ export class DraughtProbabilityDashboard implements AfterViewInit {
           scales: {
             y: {
               beginAtZero: true,
-              max: 100,
+              max: this.config.yAxisMax,
+              min: this.config.yAxisMin,
               title: {
                 display: true,
-                text: 'Xác suất (%)',
+                text: this.config.yAxisTitle,
               },
             },
             x: {
