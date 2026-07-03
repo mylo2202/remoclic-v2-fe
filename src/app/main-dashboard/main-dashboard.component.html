@@ -1,5 +1,5 @@
 <div class="dashboard-header">
-  <h1 class="mat-headline-5">Dự báo xác suất xuất hiện hạn theo các cấp và quy mô thời gian</h1>
+  <h1 class="mat-headline-5">{{ config.title }}</h1>
 </div>
 
 <div class="dashboard-grid">
@@ -10,7 +10,7 @@
     </mat-card-header>
     <mat-divider></mat-divider>
     <mat-card-content class="map-container-wrapper">
-      <div id="vietnamMap" class="leaflet-map-container"></div>
+      <div [id]="mapId" class="leaflet-map-container"></div>
       <div class="live-coords-overlay" [class.show]="isMouseOnMap">
         <span class="coord-item"><strong>Vĩ độ:</strong> {{ mouseLocation?.lat | number:'1.4-4' }}</span>
         <span class="coord-divider">|</span>
@@ -53,8 +53,8 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Timescale Selection Card -->
-    <mat-card class="dashboard-card timescale-card">
+    <!-- Options -->
+    <mat-card class="dashboard-card timescale-card" *ngIf="config.showTimescale || config.showRefDate">
       <mat-card-header>
         <mat-card-title>Tùy chọn</mat-card-title>
       </mat-card-header>
@@ -62,7 +62,7 @@
       <mat-card-content class="timescale-card-content">
 
         <!-- Quy mô thời gian -->
-        <div class="option-group">
+        <div class="option-group" *ngIf="config.showTimescale">
           <span class="option-label">Quy mô thời gian</span>
           <div class="timescale-radio-group">
             <label class="timescale-radio-label">
@@ -84,7 +84,7 @@
         </div>
 
         <!-- Thời điểm dự báo -->
-        <div class="option-group">
+        <div class="option-group" *ngIf="config.showRefDate">
           <span class="option-label">Thời điểm dự báo</span>
           <div *ngIf="isLoadingRefDates" class="ref-date-loading">
             <mat-icon class="spinning" style="font-size:16px;width:16px;height:16px;">sync</mat-icon>
@@ -95,8 +95,7 @@
               <input matInput [matDatepicker]="refDatePicker" [formControl]="refDateControl"
                 [matDatepickerFilter]="refDateFilter" readonly>
               <mat-datepicker-toggle matIconSuffix [for]="refDatePicker"></mat-datepicker-toggle>
-              <mat-datepicker #refDatePicker startView="year"
-                [calendarHeaderComponent]="monthPickerHeader"
+              <mat-datepicker #refDatePicker startView="year" [calendarHeaderComponent]="monthPickerHeader"
                 (monthSelected)="onMonthSelected($event, refDatePicker)"></mat-datepicker>
             </mat-form-field>
             <span *ngIf="availableRefDates.length === 0" class="ref-date-empty">
@@ -121,7 +120,7 @@
           <p>Đang tải dữ liệu dự báo...</p>
         </div>
 
-        <canvas id="forecastChart" [hidden]="!selectedLocation || isLoadingForecast"></canvas>
+        <canvas [id]="canvasId" [hidden]="!selectedLocation || isLoadingForecast"></canvas>
 
         <div *ngIf="!selectedLocation && !isLoadingForecast" class="chart-placeholder">
           <mat-icon>query_stats</mat-icon>
