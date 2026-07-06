@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DraughtProbabilityForecastResponse } from '../models/draught-probability-forecast-response.interface';
-import { DraughtEventForecastResponse } from '../models/draught-event-forecast-response.interface';
+import { DroughtProbabilityForecastResponse } from '../models/drought-probability-forecast-response.interface';
+import { DroughtEventForecastResponse } from '../models/drought-event-forecast-response.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
-export class DraughtForecastService {
-  private readonly refDateUrl = `${environment.apiUrl}/draught/ref-dates`;
-  private readonly probabilityForecastUrl = `${environment.apiUrl}/draught/probability-forecast`;
-  private readonly eventForecastUrl = `${environment.apiUrl}/draught/event-forecast`;
+export class DroughtForecastService {
+  private readonly refDateUrl = `${environment.apiUrl}/drought/ref-dates`;
+  private readonly probabilityForecastUrl = `${environment.apiUrl}/drought/probability-forecast`;
+  private readonly eventForecastUrl = `${environment.apiUrl}/drought/event-forecast`;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -24,7 +24,7 @@ export class DraughtForecastService {
     lng: number,
     timescale?: number,
     refDate?: string,
-  ): Observable<DraughtProbabilityForecastResponse> {
+  ): Observable<DroughtProbabilityForecastResponse> {
     const params: any = { lat, lng };
     if (timescale !== undefined) {
       params.timescale = timescale;
@@ -32,7 +32,7 @@ export class DraughtForecastService {
     if (refDate) {
       params.ref_date = refDate;
     }
-    return this.http.get<DraughtProbabilityForecastResponse>(this.probabilityForecastUrl, {
+    return this.http.get<DroughtProbabilityForecastResponse>(this.probabilityForecastUrl, {
       params,
     });
   }
@@ -42,7 +42,7 @@ export class DraughtForecastService {
     lng: number,
     timescale?: number,
     refDate?: string,
-  ): Observable<DraughtEventForecastResponse> {
+  ): Observable<DroughtEventForecastResponse> {
     const params: any = { lat, lng };
     if (timescale !== undefined) {
       params.timescale = timescale;
@@ -50,7 +50,7 @@ export class DraughtForecastService {
     if (refDate) {
       params.ref_date = refDate;
     }
-    return this.http.get<DraughtEventForecastResponse>(this.eventForecastUrl, {
+    return this.http.get<DroughtEventForecastResponse>(this.eventForecastUrl, {
       params,
     });
   }

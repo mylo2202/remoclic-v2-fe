@@ -16,7 +16,7 @@ import { Chart, registerables } from 'chart.js';
 import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
 import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
 import { DashboardConfig } from '../models/dashboard-config.model';
-import { DRAUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../constants/draught-probability-dashboard.config';
+import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../constants/drought-probability-dashboard.config';
 
 Chart.register(...registerables);
 
@@ -44,8 +44,8 @@ Chart.register(...registerables);
   styleUrl: './main-dashboard.component.css',
 })
 export class MainDashboard implements AfterViewInit {
-  // defaults to draught probability
-  @Input() config: DashboardConfig = DRAUGHT_PROBABILITY_DASHBOARD_CONFIG;
+  // defaults to drought probability
+  @Input() config: DashboardConfig = DROUGHT_PROBABILITY_DASHBOARD_CONFIG;
 
   private map: L.Map | undefined;
   private selectedMarker: L.Marker | undefined;
