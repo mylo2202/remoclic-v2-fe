@@ -1,8 +1,8 @@
 import { Injector } from '@angular/core';
 import { DashboardConfig } from '../models/dashboard-config.model';
-import { DraughtForecastService } from '../services/draught-forecast.service';
+import { DroughtForecastService } from '../services/drought-forecast.service';
 
-export const DRAUGHT_PROBABILITY_DASHBOARD_CONFIG: DashboardConfig = {
+export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DashboardConfig = {
   title: 'Dự báo xác suất xuất hiện hạn theo các cấp và quy mô thời gian',
   showTimescale: true,
   showRefDate: true,
@@ -10,9 +10,9 @@ export const DRAUGHT_PROBABILITY_DASHBOARD_CONFIG: DashboardConfig = {
   yAxisMax: 100,
   valueFormatter: (val) => `${val.toFixed(1)}%`,
   fetchRefDates: (injector: Injector) =>
-    injector.get(DraughtForecastService).getRefDates(),
+    injector.get(DroughtForecastService).getRefDates(),
   fetchData: (injector: Injector, lat: number, lng: number, scale: number, date?: string) =>
-    injector.get(DraughtForecastService).getProbabilityForecast(lat, lng, scale, date),
+    injector.get(DroughtForecastService).getProbabilityForecast(lat, lng, scale, date),
   transformData: (response) => ({
     labels: response.labels,
     datasets: [

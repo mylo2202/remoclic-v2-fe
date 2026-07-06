@@ -1,4 +1,4 @@
-export interface DraughtEventForecastResponse {
+export interface DroughtEventForecastResponse {
   location: {
     lat: number;
     lng: number;

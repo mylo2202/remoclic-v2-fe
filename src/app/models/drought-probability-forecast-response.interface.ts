@@ -1,4 +1,4 @@
-export interface DraughtProbabilityForecastResponse {
+export interface DroughtProbabilityForecastResponse {
   location: {
     lat: number;
     lng: number;
