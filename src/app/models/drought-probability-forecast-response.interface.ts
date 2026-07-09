@@ -3,6 +3,8 @@ export interface DroughtProbabilityForecastResponse {
     lat: number;
     lng: number;
   };
+  ref_date: string;
+  timescale: number;
   labels: string[];
   data: {
     mild: number[];

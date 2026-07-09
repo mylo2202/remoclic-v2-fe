@@ -54,37 +54,32 @@
     </mat-card>
 
     <!-- Options -->
-    <mat-card class="dashboard-card timescale-card" *ngIf="config.showTimescale || config.showRefDate">
+    <mat-card class="dashboard-card timescale-card">
       <mat-card-header>
         <mat-card-title>Tùy chọn</mat-card-title>
       </mat-card-header>
       <mat-divider></mat-divider>
       <mat-card-content class="timescale-card-content">
 
-        <!-- Quy mô thời gian -->
-        <div class="option-group" *ngIf="config.showTimescale">
-          <span class="option-label">Quy mô thời gian</span>
-          <div class="timescale-radio-group">
-            <label class="timescale-radio-label">
-              <input type="radio" name="timescale" [value]="1" [checked]="selectedTimescale === 1"
-                (change)="onTimescaleRadioChange(1)">
-              1 tháng
+        <!-- Biến -->
+        <div class="option-group">
+          <span class="option-label">Biến</span>
+          <div class="option-radio-group">
+            <label class="option-radio-label">
+              <input type="radio" name="timescale" [value]="1" [checked]="selectedVariable === 1"
+                (change)="onVariableRadioChange(1)">
+              {{ isTemperature ? 'Nhiệt độ trung bình tháng' : 'Tổng lượng mưa tháng' }}
             </label>
-            <label class="timescale-radio-label">
-              <input type="radio" name="timescale" [value]="3" [checked]="selectedTimescale === 3"
-                (change)="onTimescaleRadioChange(3)">
-              3 tháng
-            </label>
-            <label class="timescale-radio-label">
-              <input type="radio" name="timescale" [value]="6" [checked]="selectedTimescale === 6"
-                (change)="onTimescaleRadioChange(6)">
-              6 tháng
+            <label class="option-radio-label">
+              <input type="radio" name="timescale" [value]="2" [checked]="selectedVariable === 2"
+                (change)="onVariableRadioChange(2)">
+              {{ isTemperature ? 'Dị thường nhiệt độ trung bình tháng' : 'Dị thường lượng mưa tháng' }}
             </label>
           </div>
         </div>
 
         <!-- Thời điểm dự báo -->
-        <div class="option-group" *ngIf="config.showRefDate">
+        <div class="option-group">
           <span class="option-label">Thời điểm dự báo</span>
           <div *ngIf="isLoadingRefDates" class="ref-date-loading">
             <mat-icon class="spinning" style="font-size:16px;width:16px;height:16px;">sync</mat-icon>

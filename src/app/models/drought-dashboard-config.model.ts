@@ -1,11 +1,11 @@
 import { Injector } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export interface DashboardConfig {
+export interface DroughtDashboardConfig {
   title: string;
   showTimescale?: boolean;
   showRefDate?: boolean;
-  
+
   // API Fetch Strategy
   fetchRefDates?: (injector: Injector) => Observable<string[]>;
   fetchData: (
@@ -21,7 +21,7 @@ export interface DashboardConfig {
   yAxisMax?: number;
   yAxisMin?: number;
   valueFormatter: (value: number) => string;
-  
+
   // Data transformation Strategy
   transformData: (response: any) => {
     labels: string[];
