@@ -4,7 +4,7 @@ import { DroughtForecastService } from '../services/drought-forecast.service';
 
 export const DROUGHT_EVENT_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   title: 'Dự báo sự kiện hạn theo các cấp và quy mô thời gian',
-  yAxisTitle: 'Sự kiện hạn (z-score)',
+  yAxisTitle: '',
   valueFormatter: (val) => `${val.toFixed(2)}`,
   fetchRefDates: (injector: Injector) => injector.get(DroughtForecastService).getRefDates(),
   fetchData: (injector: Injector, lat: number, lng: number, scale: number, date?: string) =>
@@ -15,7 +15,7 @@ export const DROUGHT_EVENT_DASHBOARD_CONFIG: DroughtDashboardConfig = {
       {
         label: 'Sự kiện hạn (z-score)',
         data: response.data.dr_ens,
-        borderColor: '#654321',
+        borderColor: '#bd6817',
         backgroundColor: 'transparent',
         fill: false,
         tension: 0,

@@ -66,13 +66,13 @@
           <span class="option-label">Biến</span>
           <div class="option-radio-group">
             <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="1" [checked]="selectedVariable === 1"
-                (change)="onVariableRadioChange(1)">
+              <input type="radio" name="timescale" [value]="PR_T2_VARIABLES.forecast" [checked]="selectedVariable === PR_T2_VARIABLES.forecast"
+                (change)="onVariableRadioChange(PR_T2_VARIABLES.forecast)">
               {{ isTemperature ? 'Nhiệt độ trung bình tháng' : 'Tổng lượng mưa tháng' }}
             </label>
             <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="2" [checked]="selectedVariable === 2"
-                (change)="onVariableRadioChange(2)">
+              <input type="radio" name="timescale" [value]="PR_T2_VARIABLES.anomaly" [checked]="selectedVariable === PR_T2_VARIABLES.anomaly"
+                (change)="onVariableRadioChange(PR_T2_VARIABLES.anomaly)">
               {{ isTemperature ? 'Dị thường nhiệt độ trung bình tháng' : 'Dị thường lượng mưa tháng' }}
             </label>
           </div>
