@@ -1,0 +1,501 @@
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dashboard-header .header-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 24px;
+  /* Full height: fill remaining viewport below header */
+  height: calc(100vh - 120px);
+  min-height: 600px;
+}
+
+.dashboard-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ── Left column: map card fills the full height ── */
+.map-card {
+  grid-column: 1 / 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map-card mat-card-header {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.map-container-wrapper {
+  flex: 1;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+}
+
+.leaflet-map-container {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border-radius: 0 0 12px 12px;
+  z-index: 1;
+}
+
+/* ── Right column: stacked cards ── */
+.right-column {
+  grid-column: 2 / 3;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.info-card {
+  flex-shrink: 0;
+}
+
+.info-card-content {
+  padding: 24px !important;
+}
+
+.location-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.coords-row {
+  display: flex;
+  gap: 16px;
+}
+
+.coords-row .detail-row {
+  flex: 1;
+}
+
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: 18px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.province-name {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Timescale card */
+.timescale-card {
+  flex-shrink: 0;
+}
+
+.timescale-card-content {
+  padding: 12px 16px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.option-label {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.option-divider {
+  margin: 0 !important;
+}
+
+.ref-date-picker-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ref-date-field {
+  width: 100%;
+}
+
+/* Make the outline form field more compact */
+::ng-deep .ref-date-field .mat-mdc-form-field-infix {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  min-height: unset !important;
+}
+
+::ng-deep .ref-date-field .mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+
+.ref-date-loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.ref-date-empty {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+
+.option-radio-group {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.option-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.option-radio-label:hover {
+  color: #3b82f6;
+}
+
+.option-radio-label input[type="radio"] {
+  accent-color: #3b82f6;
+  cursor: pointer;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Lead slider */
+.lead-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lead-value-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid #bfdbfe;
+  min-width: 56px;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lead-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.lead-tick-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  min-width: 12px;
+  text-align: center;
+}
+
+.lead-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #3b82f6 0%, #3b82f6 calc((var(--lead-pct, 0)) * 100%), #e2e8f0 calc((var(--lead-pct, 0)) * 100%), #e2e8f0 100%);
+  outline: none;
+  cursor: pointer;
+}
+
+.lead-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.lead-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.5);
+}
+
+.lead-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: none;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+}
+
+.lead-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.lead-tick-mark {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.lead-tick-mark:hover {
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.lead-tick-mark.active {
+  color: #2563eb;
+  background: #dbeafe;
+  font-weight: 700;
+}
+
+
+/* Chart card fills remaining space */
+.chart-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chart-container-wrapper {
+  flex: 1;
+  padding: 8px;
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container-wrapper canvas {
+  flex: 1;
+  min-height: 0;
+  width: 100% !important;
+}
+
+.chart-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #94a3b8;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+/* Live coords overlay */
+.live-coords-overlay {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #1e293b;
+  pointer-events: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease-out, visibility 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.live-coords-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.coord-item strong {
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.coord-divider {
+  color: #cbd5e1;
+  font-weight: 300;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .map-card {
+    min-height: 50vh;
+  }
+
+  .right-column {
+    height: auto;
+  }
+}
+
+/* Leaflet overrides */
+::ng-deep .leaflet-container .leaflet-control-attribution {
+  display: none;
+}
+
+::ng-deep .vietnam-province-label {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(0, 0, 0, 0.9);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+::ng-deep .leaflet-tooltip-top:before,
+::ng-deep .leaflet-tooltip-bottom:before,
+::ng-deep .leaflet-tooltip-left:before,
+::ng-deep .leaflet-tooltip-right:before {
+  display: none !important;
+}
+
+.mat-mdc-card-header {
+  padding: 16px;
+}

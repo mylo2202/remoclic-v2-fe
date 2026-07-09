@@ -54,7 +54,7 @@
     </mat-card>
 
     <!-- Options -->
-    <mat-card class="dashboard-card timescale-card" *ngIf="config.showTimescale || config.showRefDate">
+    <mat-card class="dashboard-card timescale-card">
       <mat-card-header>
         <mat-card-title>Tùy chọn</mat-card-title>
       </mat-card-header>
@@ -62,8 +62,8 @@
       <mat-card-content class="timescale-card-content">
 
         <!-- Quy mô thời gian -->
-        <div class="option-group" *ngIf="config.showTimescale">
-          <span class="option-label">Quy mô thời gian</span>
+        <div class="option-group">
+          <span class="option-label">Quy mô thời gian (Timescale)</span>
           <div class="option-radio-group">
             <label class="option-radio-label">
               <input type="radio" name="timescale" [value]="1" [checked]="selectedTimescale === 1"
@@ -84,7 +84,7 @@
         </div>
 
         <!-- Thời điểm dự báo -->
-        <div class="option-group" *ngIf="config.showRefDate">
+        <div class="option-group">
           <span class="option-label">Thời điểm dự báo</span>
           <div *ngIf="isLoadingRefDates" class="ref-date-loading">
             <mat-icon class="spinning" style="font-size:16px;width:16px;height:16px;">sync</mat-icon>

@@ -30,6 +30,7 @@ import {
   loadProvinceGeoJson,
 } from '../shared/utils/dashboard-helpers';
 import { PR_T2_TEMPERATURE_DASHBOARD_CONFIG } from '../constants/pr-t2-temperature-dashboard.config';
+import { PR_T2_VARIABLES } from '../constants/pr-t2-variables.constant';
 
 Chart.register(...registerables);
 
@@ -72,7 +73,6 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
   mouseLocation: { lat: number; lng: number } | null = null;
   isMouseOnMap: boolean = false;
   currentZoom: number = 6;
-  selectedVariable: number = 1;
 
   availableRefDates: Date[] = []; // parsed Date objects from API
   selectedRefDate: Date | null = null; // currently selected month
@@ -82,6 +82,9 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
 
   /** Reference to the custom header — passed to [calendarHeaderComponent] */
   readonly monthPickerHeader = MonthPickerHeaderComponent;
+
+  protected readonly PR_T2_VARIABLES = PR_T2_VARIABLES;
+  selectedVariable: string = PR_T2_VARIABLES.forecast;
 
   constructor(
     private readonly cdr: ChangeDetectorRef,
@@ -162,7 +165,7 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
     this.fetchForecastData(latlng.lat, latlng.lng);
   }
 
-  onVariableRadioChange(value: number): void {
+  onVariableRadioChange(value: string): void {
     this.selectedVariable = value;
     if (this.lastForecastResponse) {
       const chartData = this.config.transformData(this.lastForecastResponse, this.selectedVariable);
@@ -243,15 +246,15 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
     const ctx = document.getElementById(this.canvasId) as HTMLCanvasElement;
     if (!ctx) return;
 
-    const datasetLabel = data.datasets?.[0]?.label || this.config.yAxisTitle;
+    // const datasetLabel = this.config.getYAxisTitle(this.selectedVariable);
 
     if (this.forecastChart) {
       this.forecastChart.data.labels = data.labels;
       this.forecastChart.data.datasets = data.datasets;
-      const yScale = this.forecastChart.options.scales?.['y'] as any;
-      if (yScale?.title) {
-        yScale.title.text = datasetLabel;
-      }
+      // const yScale = this.forecastChart.options.scales?.['y'] as any;
+      // if (yScale?.title) {
+      //   yScale.title.text = datasetLabel;
+      // }
       this.forecastChart.update();
     } else {
       this.forecastChart = new Chart(ctx, {
@@ -286,10 +289,10 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
               beginAtZero: true,
               max: this.config.yAxisMax,
               min: this.config.yAxisMin,
-              title: {
-                display: true,
-                text: datasetLabel,
-              },
+              // title: {
+              //   display: true,
+              //   text: datasetLabel,
+              // },
             },
             x: {
               title: {
