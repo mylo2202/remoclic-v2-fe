@@ -18,7 +18,7 @@ export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DroughtDashboardConfig = {
         label: 'Hạn nhẹ (Mild)',
         data: response.data.mild,
         borderColor: '#fbbf24',
-        backgroundColor: 'rgba(251, 191, 36, 0.6)',
+        backgroundColor: '#fbbf2499',
         fill: 1, // Fill space between this dataset and Moderate
         tension: 0,
       },
@@ -26,7 +26,7 @@ export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DroughtDashboardConfig = {
         label: 'Hạn vừa (Moderate)',
         data: response.data.mord,
         borderColor: '#f97316',
-        backgroundColor: 'rgba(249, 115, 22, 0.6)',
+        backgroundColor: '#f9731699',
         fill: 2, // Fill space between this dataset and Severe
         tension: 0,
       },
@@ -34,7 +34,7 @@ export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DroughtDashboardConfig = {
         label: 'Hạn nặng (Severe)',
         data: response.data.seve,
         borderColor: '#dc2626',
-        backgroundColor: 'rgba(220, 38, 38, 0.6)',
+        backgroundColor: '#dc262699',
         fill: 'origin', // Fill space to the 0-axis
         tension: 0,
       },
