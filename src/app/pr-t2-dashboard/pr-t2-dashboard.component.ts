@@ -15,13 +15,13 @@ import 'leaflet.vectorgrid';
 import { Chart, registerables } from 'chart.js';
 import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
 import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
-import { DashboardConfig } from '../models/dashboard-config.model';
-import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../constants/drought-probability-dashboard.config';
+import { PrT2DashboardConfig } from '../models/pr-t2-dashboard-config.model';
+import { PR_T2_PRECIPITATION_DASHBOARD_CONFIG } from '../constants/pr-t2-precipitation-dashboard.config';
 
 Chart.register(...registerables);
 
 @Component({
-  selector: 'main-dashboard',
+  selector: 'pr-t2-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -40,12 +40,12 @@ Chart.register(...registerables);
     { provide: DateAdapter, useClass: ViDateAdapter },
     { provide: MAT_DATE_FORMATS, useValue: VI_MONTH_DATE_FORMATS },
   ],
-  templateUrl: './main-dashboard.component.html',
-  styleUrl: './main-dashboard.component.css',
+  templateUrl: './pr-t2-dashboard.component.html',
+  styleUrl: './pr-t2-dashboard.component.css',
 })
-export class MainDashboard implements AfterViewInit {
-  // defaults to drought probability
-  @Input() config: DashboardConfig = DROUGHT_PROBABILITY_DASHBOARD_CONFIG;
+export class PrT2Dashboard implements AfterViewInit {
+  // defaults to precipitation
+  @Input() config: PrT2DashboardConfig = PR_T2_PRECIPITATION_DASHBOARD_CONFIG;
 
   private map: L.Map | undefined;
   private selectedMarker: L.Marker | undefined;
@@ -60,7 +60,7 @@ export class MainDashboard implements AfterViewInit {
   mouseLocation: { lat: number; lng: number } | null = null;
   isMouseOnMap: boolean = false;
   currentZoom: number = 6;
-  selectedTimescale: number = 1;
+  selectedVariable: number = 1;
 
   availableRefDates: Date[] = []; // parsed Date objects from API
   selectedRefDate: Date | null = null; // currently selected month
@@ -80,6 +80,7 @@ export class MainDashboard implements AfterViewInit {
 
   isLoadingForecast: boolean = false;
   private forecastChart: Chart | undefined;
+  private lastForecastResponse: any = null;
 
   constructor(
     private readonly cdr: ChangeDetectorRef,
@@ -262,10 +263,11 @@ export class MainDashboard implements AfterViewInit {
     this.fetchForecastData(latlng.lat, latlng.lng);
   }
 
-  onTimescaleRadioChange(value: number): void {
-    this.selectedTimescale = value;
-    if (this.selectedLocation) {
-      this.fetchForecastData(this.selectedLocation.lat, this.selectedLocation.lng);
+  onVariableRadioChange(value: number): void {
+    this.selectedVariable = value;
+    if (this.lastForecastResponse) {
+      const chartData = this.config.transformData(this.lastForecastResponse, this.selectedVariable);
+      this.updateChart(chartData);
     }
   }
 
@@ -292,10 +294,11 @@ export class MainDashboard implements AfterViewInit {
     this.cdr.detectChanges();
 
     this.config
-      .fetchData(this.injector, lat, lng, this.selectedTimescale, this.selectedRefDateForApi)
+      .fetchData(this.injector, lat, lng, this.selectedRefDateForApi)
       .subscribe({
         next: (response) => {
-          const chartData = this.config.transformData(response);
+          this.lastForecastResponse = response;
+          const chartData = this.config.transformData(response, this.selectedVariable);
           this.updateChart(chartData);
           this.isLoadingForecast = false;
           this.cdr.detectChanges();
@@ -313,9 +316,15 @@ export class MainDashboard implements AfterViewInit {
     const ctx = document.getElementById(this.canvasId) as HTMLCanvasElement;
     if (!ctx) return;
 
+    const datasetLabel = data.datasets?.[0]?.label || this.config.yAxisTitle;
+
     if (this.forecastChart) {
       this.forecastChart.data.labels = data.labels;
       this.forecastChart.data.datasets = data.datasets;
+      const yScale = this.forecastChart.options.scales?.['y'] as any;
+      if (yScale?.title) {
+        yScale.title.text = datasetLabel;
+      }
       this.forecastChart.update();
     } else {
       this.forecastChart = new Chart(ctx, {
@@ -352,7 +361,7 @@ export class MainDashboard implements AfterViewInit {
               min: this.config.yAxisMin,
               title: {
                 display: true,
-                text: this.config.yAxisTitle,
+                text: datasetLabel,
               },
             },
             x: {

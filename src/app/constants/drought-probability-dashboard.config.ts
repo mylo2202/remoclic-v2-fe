@@ -1,8 +1,8 @@
 import { Injector } from '@angular/core';
-import { DashboardConfig } from '../models/dashboard-config.model';
+import { DroughtDashboardConfig } from '../models/drought-dashboard-config.model';
 import { DroughtForecastService } from '../services/drought-forecast.service';
 
-export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DashboardConfig = {
+export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   title: 'Dự báo xác suất xuất hiện hạn theo các cấp và quy mô thời gian',
   showTimescale: true,
   showRefDate: true,
