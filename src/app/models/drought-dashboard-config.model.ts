@@ -3,8 +3,6 @@ import { Observable } from 'rxjs';
 
 export interface DroughtDashboardConfig {
   title: string;
-  showTimescale?: boolean;
-  showRefDate?: boolean;
 
   // API Fetch Strategy
   fetchRefDates?: (injector: Injector) => Observable<string[]>;
@@ -13,7 +11,7 @@ export interface DroughtDashboardConfig {
     lat: number,
     lng: number,
     timescale: number,
-    refDate?: string
+    refDate?: string,
   ) => Observable<any>;
 
   // Chart styling & format strategies

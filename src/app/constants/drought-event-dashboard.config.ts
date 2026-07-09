@@ -4,8 +4,6 @@ import { DroughtForecastService } from '../services/drought-forecast.service';
 
 export const DROUGHT_EVENT_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   title: 'Dự báo sự kiện hạn theo các cấp và quy mô thời gian',
-  showTimescale: true,
-  showRefDate: true,
   yAxisTitle: 'Sự kiện hạn (z-score)',
   valueFormatter: (val) => `${val.toFixed(2)}`,
   fetchRefDates: (injector: Injector) => injector.get(DroughtForecastService).getRefDates(),
