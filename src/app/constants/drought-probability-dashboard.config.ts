@@ -4,6 +4,7 @@ import { DroughtForecastService } from '../services/drought-forecast.service';
 
 export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   title: 'Dự báo xác suất xuất hiện hạn theo các cấp và quy mô thời gian',
+  isProbability: true,
   yAxisTitle: 'Xác suất (%)',
   yAxisMax: 100,
   valueFormatter: (val) => `${val.toFixed(2)}%`,

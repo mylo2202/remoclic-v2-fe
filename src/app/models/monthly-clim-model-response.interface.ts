@@ -6,7 +6,7 @@ export interface MonthlyClimModelResponse {
   lead: number;
   labels: string[];
   data: {
-    pr_o: number[];
-    t2_o: number[];
+    pr_m: number[];
+    t2_m: number[];
   };
 }

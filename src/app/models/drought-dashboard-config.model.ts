@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 
 export interface DroughtDashboardConfig {
   title: string;
+  isProbability: boolean;
 
   // API Fetch Strategy
   fetchRefDates?: (injector: Injector) => Observable<string[]>;

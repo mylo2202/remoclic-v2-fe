@@ -5,6 +5,7 @@ import { MONTHLY_CLIM_VARIABLES } from './monthly-clim-variables.constant';
 
 export const MONTHLY_CLIM_OBSERVED_DASHBOARD_CONFIG: MonthlyClimDashboardConfig = {
   title: 'Trung bình khí hậu quan trắc các tháng trong năm',
+  showLeadSlider: false,
   // getYAxisTitle: (selectedVariable = MONTHLY_CLIM_VARIABLES.temperature) => {
   //   const isPrecipitation = selectedVariable === MONTHLY_CLIM_VARIABLES.precipitation;
   //   return isPrecipitation ? 'Trung bình tổng lượng mưa (mm/tháng)' : 'Trung bình nhiệt độ (độ C)';

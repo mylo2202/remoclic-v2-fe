@@ -289,10 +289,10 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
               beginAtZero: true,
               max: this.config.yAxisMax,
               min: this.config.yAxisMin,
-              title: {
-                display: true,
-                // text: datasetLabel,
-              },
+              // title: {
+              //   display: true,
+              //   text: datasetLabel,
+              // },
             },
             x: {
               title: {

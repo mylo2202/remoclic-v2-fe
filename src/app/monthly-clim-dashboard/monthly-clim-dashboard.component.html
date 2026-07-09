@@ -61,48 +61,45 @@
       <mat-divider></mat-divider>
       <mat-card-content class="timescale-card-content">
 
-        <!-- Quy mô thời gian -->
+        <!-- Biến -->
         <div class="option-group">
-          <span class="option-label">Quy mô thời gian (Timescale)</span>
+          <span class="option-label">Biến</span>
           <div class="option-radio-group">
             <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="1" [checked]="selectedTimescale === 1"
-                (change)="onTimescaleRadioChange(1)">
-              1 tháng
+              <input type="radio" name="timescale" [value]="MONTHLY_CLIM_VARIABLES.temperature"
+                [checked]="selectedVariable === MONTHLY_CLIM_VARIABLES.temperature"
+                (change)="onVariableRadioChange(MONTHLY_CLIM_VARIABLES.temperature)">
+              Nhiệt độ
             </label>
             <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="3" [checked]="selectedTimescale === 3"
-                (change)="onTimescaleRadioChange(3)">
-              3 tháng
-            </label>
-            <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="6" [checked]="selectedTimescale === 6"
-                (change)="onTimescaleRadioChange(6)">
-              6 tháng
+              <input type="radio" name="timescale" [value]="MONTHLY_CLIM_VARIABLES.precipitation"
+                [checked]="selectedVariable === MONTHLY_CLIM_VARIABLES.precipitation"
+                (change)="onVariableRadioChange(MONTHLY_CLIM_VARIABLES.precipitation)">
+              Tổng lượng mưa
             </label>
           </div>
         </div>
 
-        <!-- Thời điểm dự báo -->
-        <div class="option-group">
-          <span class="option-label">Thời điểm dự báo</span>
-          <div *ngIf="isLoadingRefDates" class="ref-date-loading">
-            <mat-icon class="spinning" style="font-size:16px;width:16px;height:16px;">sync</mat-icon>
-            <span>Đang tải...</span>
+        <!-- Lead (chỉ hiện với dashboard mô hình) -->
+        <ng-container *ngIf="config.showLeadSlider">
+<!--          <mat-divider class="option-divider"></mat-divider>-->
+          <div class="option-group">
+            <div class="lead-label-row">
+              <span class="option-label">Thời hạn dự báo (Lead)</span>
+              <span class="lead-value-badge">{{ selectedLead }} tháng</span>
+            </div>
+            <div class="lead-slider-wrapper">
+<!--              <span class="lead-tick-label">1</span>-->
+              <input type="range" class="lead-slider" min="1" max="6" step="1" [value]="selectedLead"
+                (input)="onLeadChange(+$any($event.target).value)" />
+<!--              <span class="lead-tick-label">6</span>-->
+            </div>
+            <div class="lead-ticks">
+              <span *ngFor="let opt of leadOptions" class="lead-tick-mark" [class.active]="opt === selectedLead"
+                (click)="onLeadChange(opt)">{{ opt }}</span>
+            </div>
           </div>
-          <div *ngIf="!isLoadingRefDates">
-            <mat-form-field class="ref-date-field" appearance="outline" subscriptSizing="dynamic">
-              <input matInput [matDatepicker]="refDatePicker" [formControl]="refDateControl"
-                [matDatepickerFilter]="refDateFilter" readonly>
-              <mat-datepicker-toggle matIconSuffix [for]="refDatePicker"></mat-datepicker-toggle>
-              <mat-datepicker #refDatePicker startView="year" [calendarHeaderComponent]="monthPickerHeader"
-                (monthSelected)="onMonthSelected($event, refDatePicker)"></mat-datepicker>
-            </mat-form-field>
-            <span *ngIf="availableRefDates.length === 0" class="ref-date-empty">
-              Không có dữ liệu
-            </span>
-          </div>
-        </div>
+        </ng-container>
 
       </mat-card-content>
     </mat-card>
@@ -111,20 +108,20 @@
     <!-- Forecast Chart Card -->
     <mat-card class="dashboard-card chart-card">
       <mat-card-header>
-        <mat-card-title>Biểu đồ dự báo 6 tháng</mat-card-title>
+        <mat-card-title>Biểu đồ khí hậu 12 tháng</mat-card-title>
       </mat-card-header>
       <mat-divider></mat-divider>
       <mat-card-content class="chart-container-wrapper">
-        <div *ngIf="isLoadingForecast" class="chart-loading-overlay">
+        <div *ngIf="isLoadingClimate" class="chart-loading-overlay">
           <mat-icon class="spinning">sync</mat-icon>
-          <p>Đang tải dữ liệu dự báo...</p>
+          <p>Đang tải dữ liệu khí hậu...</p>
         </div>
 
-        <canvas [id]="canvasId" [hidden]="!selectedLocation || isLoadingForecast"></canvas>
+        <canvas [id]="canvasId" [hidden]="!selectedLocation || isLoadingClimate"></canvas>
 
-        <div *ngIf="!selectedLocation && !isLoadingForecast" class="chart-placeholder">
+        <div *ngIf="!selectedLocation && !isLoadingClimate" class="chart-placeholder">
           <mat-icon>query_stats</mat-icon>
-          <p>Chọn một vị trí trên bản đồ để xem biểu đồ dự báo</p>
+          <p>Chọn một vị trí trên bản đồ để xem biểu đồ khí hậu</p>
         </div>
       </mat-card-content>
     </mat-card>
