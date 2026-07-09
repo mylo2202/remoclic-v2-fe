@@ -26,7 +26,7 @@ export const PR_T2_PRECIPITATION_DASHBOARD_CONFIG: PrT2DashboardConfig = {
           label: isAnomaly ? 'Dị thường lượng mưa tháng (%)' : 'Tổng lượng mưa tháng (mm/tháng)',
           data: isAnomaly ? response.data.pr_ano : response.data.pr_fcs,
           borderColor: isAnomaly ? '#06b6d4' : '#2563eb',
-          backgroundColor: 'transparent',
+          backgroundColor: isAnomaly ? '#06b6d499' : '#2563eb99',
           fill: !isAnomaly,
           tension: 0,
         },
