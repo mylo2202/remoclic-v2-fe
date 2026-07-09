@@ -64,18 +64,18 @@
         <!-- Quy mô thời gian -->
         <div class="option-group" *ngIf="config.showTimescale">
           <span class="option-label">Quy mô thời gian</span>
-          <div class="timescale-radio-group">
-            <label class="timescale-radio-label">
+          <div class="option-radio-group">
+            <label class="option-radio-label">
               <input type="radio" name="timescale" [value]="1" [checked]="selectedTimescale === 1"
                 (change)="onTimescaleRadioChange(1)">
               1 tháng
             </label>
-            <label class="timescale-radio-label">
+            <label class="option-radio-label">
               <input type="radio" name="timescale" [value]="3" [checked]="selectedTimescale === 3"
                 (change)="onTimescaleRadioChange(3)">
               3 tháng
             </label>
-            <label class="timescale-radio-label">
+            <label class="option-radio-label">
               <input type="radio" name="timescale" [value]="6" [checked]="selectedTimescale === 6"
                 (change)="onTimescaleRadioChange(6)">
               6 tháng

@@ -4,8 +4,7 @@ import { PrT2ForecastService } from '../services/pr-t2-forecast.service';
 
 export const PR_T2_PRECIPITATION_DASHBOARD_CONFIG: PrT2DashboardConfig = {
   title: 'Dự báo tổng lượng mưa tháng và dị thường lượng mưa tháng',
-  showTimescale: true,
-  showRefDate: true,
+  isTemperature: false,
   yAxisTitle: 'Tổng lượng mưa tháng (mm/tháng)',
   valueFormatter: (val) => `${val.toFixed(2)}`,
   fetchRefDates: (injector: Injector) => injector.get(PrT2ForecastService).getRefDates(),
@@ -17,9 +16,7 @@ export const PR_T2_PRECIPITATION_DASHBOARD_CONFIG: PrT2DashboardConfig = {
       labels: response.labels,
       datasets: [
         {
-          label: isAnomaly
-            ? 'Dị thường lượng mưa tháng (%)'
-            : 'Tổng lượng mưa tháng (mm/tháng)',
+          label: isAnomaly ? 'Dị thường lượng mưa tháng (%)' : 'Tổng lượng mưa tháng (mm/tháng)',
           data: isAnomaly ? response.data.pr_ano : response.data.pr_fcs,
           borderColor: isAnomaly ? '#06b6d4' : '#2563eb',
           backgroundColor: 'transparent',

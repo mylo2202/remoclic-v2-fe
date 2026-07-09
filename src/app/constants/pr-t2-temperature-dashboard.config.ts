@@ -4,8 +4,7 @@ import { PrT2ForecastService } from '../services/pr-t2-forecast.service';
 
 export const PR_T2_TEMPERATURE_DASHBOARD_CONFIG: PrT2DashboardConfig = {
   title: 'Dự báo nhiệt độ trung bình tháng và dị thường nhiệt độ trung bình tháng',
-  showTimescale: true,
-  showRefDate: true,
+  isTemperature: true,
   yAxisTitle: 'Nhiệt độ trung bình tháng (độ C)',
   valueFormatter: (val) => `${val.toFixed(2)}`,
   fetchRefDates: (injector: Injector) => injector.get(PrT2ForecastService).getRefDates(),
