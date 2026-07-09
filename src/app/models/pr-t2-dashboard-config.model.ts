@@ -12,7 +12,7 @@ export interface PrT2DashboardConfig {
   yAxisTitle: string;
   yAxisMax?: number;
   yAxisMin?: number;
-  valueFormatter: (value: number) => string;
+  valueFormatter: (value: number, selectedVariable?: number) => string;
 
   // Data transformation Strategy
   transformData: (

@@ -274,7 +274,7 @@ export class PrT2Dashboard implements OnInit, AfterViewInit {
                     label += ': ';
                   }
                   if (context.parsed.y !== null) {
-                    label += this.config.valueFormatter(context.parsed.y);
+                    label += this.config.valueFormatter(context.parsed.y, this.selectedVariable);
                   }
                   return label;
                 },

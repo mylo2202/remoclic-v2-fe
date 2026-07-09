@@ -8,9 +8,8 @@ export const DROUGHT_PROBABILITY_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   showRefDate: true,
   yAxisTitle: 'Xác suất (%)',
   yAxisMax: 100,
-  valueFormatter: (val) => `${val.toFixed(1)}%`,
-  fetchRefDates: (injector: Injector) =>
-    injector.get(DroughtForecastService).getRefDates(),
+  valueFormatter: (val) => `${val.toFixed(2)}%`,
+  fetchRefDates: (injector: Injector) => injector.get(DroughtForecastService).getRefDates(),
   fetchData: (injector: Injector, lat: number, lng: number, scale: number, date?: string) =>
     injector.get(DroughtForecastService).getProbabilityForecast(lat, lng, scale, date),
   transformData: (response) => ({

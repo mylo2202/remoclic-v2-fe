@@ -7,7 +7,7 @@ export const DROUGHT_EVENT_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   showTimescale: true,
   showRefDate: true,
   yAxisTitle: 'Sự kiện hạn (z-score)',
-  valueFormatter: (val) => `${val.toFixed(1)}`,
+  valueFormatter: (val) => `${val.toFixed(2)}`,
   fetchRefDates: (injector: Injector) => injector.get(DroughtForecastService).getRefDates(),
   fetchData: (injector: Injector, lat: number, lng: number, scale: number, date?: string) =>
     injector.get(DroughtForecastService).getEventForecast(lat, lng, scale, date),
