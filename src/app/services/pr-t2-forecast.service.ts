@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PrT2PrecipitationForecastResponse } from '../models/pr-t2-precipitation-forecast-response.interface';
-import { PrT2TemperatureForecastResponse } from '../models/pr-t2-temperature-forecast-response.interface';
+import { PrT2PrecipitationForecastResponse } from '../models/pr-t2/pr-t2-precipitation-forecast-response.interface';
+import { PrT2TemperatureForecastResponse } from '../models/pr-t2/pr-t2-temperature-forecast-response.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({

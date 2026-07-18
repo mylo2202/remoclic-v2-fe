@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
 import { Layout } from './layout/layout';
-import { DroughtDashboard } from './drought-dashboard/drought-dashboard.component';
-import { PrT2Dashboard } from './pr-t2-dashboard/pr-t2-dashboard.component';
-import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from './constants/drought-probability-dashboard.config';
-import { DROUGHT_EVENT_DASHBOARD_CONFIG } from './constants/drought-event-dashboard.config';
-import { PR_T2_TEMPERATURE_DASHBOARD_CONFIG } from './constants/pr-t2-temperature-dashboard.config';
-import { PR_T2_PRECIPITATION_DASHBOARD_CONFIG } from './constants/pr-t2-precipitation-dashboard.config';
-import { MonthlyClimDashboard } from './monthly-clim-dashboard/monthly-clim-dashboard.component';
-import { MONTHLY_CLIM_OBSERVED_DASHBOARD_CONFIG } from './constants/monthly-clim-observed-dashboard.config';
-import { MONTHLY_CLIM_MODEL_DASHBOARD_CONFIG } from './constants/monthly-clim-model-dashboard.config';
+import { DroughtDashboard } from './components/drought-dashboard/drought-dashboard.component';
+import { PrT2Dashboard } from './components/pr-t2-dashboard/pr-t2-dashboard.component';
+import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from './constants/drought/drought-probability-dashboard.config';
+import { DROUGHT_EVENT_DASHBOARD_CONFIG } from './constants/drought/drought-event-dashboard.config';
+import { PR_T2_TEMPERATURE_DASHBOARD_CONFIG } from './constants/pr-t2/pr-t2-temperature-dashboard.config';
+import { PR_T2_PRECIPITATION_DASHBOARD_CONFIG } from './constants/pr-t2/pr-t2-precipitation-dashboard.config';
+import { MonthlyClimDashboard } from './components/monthly-clim-dashboard/monthly-clim-dashboard.component';
+import { MONTHLY_CLIM_OBSERVED_DASHBOARD_CONFIG } from './constants/monthly-clim/monthly-clim-observed-dashboard.config';
+import { MONTHLY_CLIM_MODEL_DASHBOARD_CONFIG } from './constants/monthly-clim/monthly-clim-model-dashboard.config';
 
 export const routes: Routes = [
   {

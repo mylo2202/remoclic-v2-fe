@@ -1,4 +1,11 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Injector, Input } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  Injector,
+  Input,
+  OnInit,
+} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,22 +19,23 @@ import { MatInputModule } from '@angular/material/input';
 import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/material/core';
 import * as L from 'leaflet';
 import 'leaflet.vectorgrid';
-import { Chart, registerables } from 'chart.js';
-import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
-import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
-import { DroughtDashboardConfig } from '../models/drought-dashboard-config.model';
-import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../constants/drought-probability-dashboard.config';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { MonthPickerHeaderComponent } from '../../shared/components/month-picker-header/month-picker-header.component';
+import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../../shared/adapters/vi-date.adapter';
+import { PrT2DashboardConfig } from '../../models/pr-t2/pr-t2-dashboard-config.model';
 import {
   formatRefDate,
   initLeafletMarkerIcon,
   isRefDateAvailable,
   loadProvinceGeoJson,
-} from '../shared/utils/dashboard-helpers';
+} from '../../shared/utils/dashboard-helpers';
+import { PR_T2_TEMPERATURE_DASHBOARD_CONFIG } from '../../constants/pr-t2/pr-t2-temperature-dashboard.config';
+import { PR_T2_VARIABLES } from '../../constants/pr-t2/pr-t2-variables.constant';
 
 Chart.register(...registerables);
 
 @Component({
-  selector: 'drought-dashboard',
+  selector: 'pr-t2-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -46,12 +54,12 @@ Chart.register(...registerables);
     { provide: DateAdapter, useClass: ViDateAdapter },
     { provide: MAT_DATE_FORMATS, useValue: VI_MONTH_DATE_FORMATS },
   ],
-  templateUrl: './drought-dashboard.component.html',
-  styleUrl: './drought-dashboard.component.css',
+  templateUrl: './pr-t2-dashboard.component.html',
+  styleUrl: './pr-t2-dashboard.component.css',
 })
-export class DroughtDashboard implements AfterViewInit {
-  // defaults to drought probability
-  @Input() config: DroughtDashboardConfig = DROUGHT_PROBABILITY_DASHBOARD_CONFIG;
+export class PrT2Dashboard implements OnInit, AfterViewInit {
+  // defaults to temperature
+  @Input() config: PrT2DashboardConfig = PR_T2_TEMPERATURE_DASHBOARD_CONFIG;
 
   private map: L.Map | undefined;
   private selectedMarker: L.Marker | undefined;
@@ -59,38 +67,89 @@ export class DroughtDashboard implements AfterViewInit {
   /** Unique ID for the canvas element — prevents DOM conflicts when both routes are cached */
   readonly canvasId = `forecastChart-${Math.random().toString(36).slice(2)}`;
   readonly mapId = `vietnamMap-${Math.random().toString(36).slice(2)}`;
+  readonly expandedCanvasId = `forecastChartExpanded-${Math.random().toString(36).slice(2)}`;
 
   selectedLocation: { lat: number; lng: number } | null = null;
   selectedProvinceName: string | null = null;
   mouseLocation: { lat: number; lng: number } | null = null;
   isMouseOnMap: boolean = false;
   currentZoom: number = 6;
-  selectedTimescale: number = 1;
 
   availableRefDates: Date[] = []; // parsed Date objects from API
   selectedRefDate: Date | null = null; // currently selected month
   refDateControl = new FormControl<Date | null>(null);
   isLoadingRefDates: boolean = false;
+  isTemperature: boolean = true;
 
   /** Reference to the custom header — passed to [calendarHeaderComponent] */
   readonly monthPickerHeader = MonthPickerHeaderComponent;
 
+  protected readonly PR_T2_VARIABLES = PR_T2_VARIABLES;
+  selectedVariable: string = PR_T2_VARIABLES.forecast;
+
   constructor(
     private readonly cdr: ChangeDetectorRef,
     private readonly injector: Injector,
-  ) {}
+  ) { }
 
   isLoadingForecast: boolean = false;
+  isChartExpanded: boolean = false;
   private forecastChart: Chart | undefined;
+  private lastForecastResponse: any = null;
+  private expandedChart: Chart | undefined;
+  private _escListener: ((e: KeyboardEvent) => void) | undefined;
 
   /** Format selectedRefDate as yyyy-MM-dd for the API */
   private get selectedRefDateForApi(): string | undefined {
     return formatRefDate(this.selectedRefDate);
   }
 
+  /** Only allow months that exist in availableRefDates */
+  refDateFilter = (date: Date | null): boolean => {
+    return isRefDateAvailable(date, this.availableRefDates);
+  };
+
   ngAfterViewInit() {
     this.initMap();
     this.loadRefDates();
+  }
+
+  expandChart(): void {
+    if (!this.forecastChart) return;
+    this.isChartExpanded = true;
+    this.cdr.detectChanges();
+
+    // Small delay to let Angular render the canvas in the DOM
+    setTimeout(() => {
+      const ctx = document.getElementById(this.expandedCanvasId) as HTMLCanvasElement;
+      if (!ctx || !this.forecastChart) return;
+
+      const src = this.forecastChart;
+      this.expandedChart = new Chart(ctx, {
+        type: (src.config as ChartConfiguration).type,
+        data: JSON.parse(JSON.stringify(src.data)), // deep-copy data
+        options: JSON.parse(JSON.stringify(src.options)), // deep-copy options
+      });
+    }, 50);
+
+    // Close on ESC
+    this._escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') this.closeChart();
+    };
+    document.addEventListener('keydown', this._escListener);
+  }
+
+  closeChart(event?: MouseEvent): void {
+    this.isChartExpanded = false;
+    if (this.expandedChart) {
+      this.expandedChart.destroy();
+      this.expandedChart = undefined;
+    }
+    if (this._escListener) {
+      document.removeEventListener('keydown', this._escListener);
+      this._escListener = undefined;
+    }
+    this.cdr.detectChanges();
   }
 
   private loadRefDates(): void {
@@ -123,10 +182,9 @@ export class DroughtDashboard implements AfterViewInit {
     });
   }
 
-  /** Only allow months that exist in availableRefDates */
-  refDateFilter = (date: Date | null): boolean => {
-    return isRefDateAvailable(date, this.availableRefDates);
-  };
+  ngOnInit() {
+    this.isTemperature = this.config.isTemperature;
+  }
 
   private updateSelection(latlng: L.LatLng, provinceName: string | null = null): void {
     if (!provinceName) {
@@ -149,10 +207,11 @@ export class DroughtDashboard implements AfterViewInit {
     this.fetchForecastData(latlng.lat, latlng.lng);
   }
 
-  onTimescaleRadioChange(value: number): void {
-    this.selectedTimescale = value;
-    if (this.selectedLocation) {
-      this.fetchForecastData(this.selectedLocation.lat, this.selectedLocation.lng);
+  onVariableRadioChange(value: string): void {
+    this.selectedVariable = value;
+    if (this.lastForecastResponse) {
+      const chartData = this.config.transformData(this.lastForecastResponse, this.selectedVariable);
+      this.updateChart(chartData);
     }
   }
 
@@ -209,30 +268,35 @@ export class DroughtDashboard implements AfterViewInit {
     this.isLoadingForecast = true;
     this.cdr.detectChanges();
 
-    this.config
-      .fetchData(this.injector, lat, lng, this.selectedTimescale, this.selectedRefDateForApi)
-      .subscribe({
-        next: (response) => {
-          const chartData = this.config.transformData(response);
-          this.updateChart(chartData);
-          this.isLoadingForecast = false;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Error fetching forecast data:', err);
-          this.isLoadingForecast = false;
-          this.cdr.detectChanges();
-        },
-      });
+    this.config.fetchData(this.injector, lat, lng, this.selectedRefDateForApi).subscribe({
+      next: (response) => {
+        this.lastForecastResponse = response;
+        const chartData = this.config.transformData(response, this.selectedVariable);
+        this.updateChart(chartData);
+        this.isLoadingForecast = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching forecast data:', err);
+        this.isLoadingForecast = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   private updateChart(data: any): void {
     const ctx = document.getElementById(this.canvasId) as HTMLCanvasElement;
     if (!ctx) return;
 
+    // const datasetLabel = this.config.getYAxisTitle(this.selectedVariable);
+
     if (this.forecastChart) {
       this.forecastChart.data.labels = data.labels;
       this.forecastChart.data.datasets = data.datasets;
+      // const yScale = this.forecastChart.options.scales?.['y'] as any;
+      // if (yScale?.title) {
+      //   yScale.title.text = datasetLabel;
+      // }
       this.forecastChart.update();
     } else {
       this.forecastChart = new Chart(ctx, {
@@ -255,7 +319,7 @@ export class DroughtDashboard implements AfterViewInit {
                     label += ': ';
                   }
                   if (context.parsed.y !== null) {
-                    label += this.config.valueFormatter(context.parsed.y);
+                    label += this.config.valueFormatter(context.parsed.y, this.selectedVariable);
                   }
                   return label;
                 },
@@ -267,10 +331,10 @@ export class DroughtDashboard implements AfterViewInit {
               beginAtZero: true,
               max: this.config.yAxisMax,
               min: this.config.yAxisMin,
-              title: {
-                display: this.config.isProbability,
-                text: this.config.yAxisTitle,
-              },
+              // title: {
+              //   display: true,
+              //   text: datasetLabel,
+              // },
             },
             x: {
               title: {

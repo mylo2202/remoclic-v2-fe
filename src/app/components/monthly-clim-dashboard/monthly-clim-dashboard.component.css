@@ -21,9 +21,9 @@
   display: grid;
   grid-template-columns: 2.5fr 1fr;
   gap: 24px;
-  /* Full height: fill remaining viewport below header */
+  /* Use min-height so the grid can grow beyond the viewport when zoomed */
+  min-height: calc(100vh - 120px);
   height: calc(100vh - 120px);
-  min-height: 600px;
 }
 
 .dashboard-card {
@@ -72,7 +72,9 @@
   gap: 24px;
   height: 100%;
   min-height: 0;
-  overflow: hidden;
+  /* Allow vertical scrolling so chart card is always reachable at high zoom */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .info-card {
@@ -215,9 +217,9 @@
 
 .option-radio-group {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-start;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .option-radio-label {
@@ -244,10 +246,114 @@
   height: 16px;
 }
 
-/* Chart card fills remaining space */
-.chart-card {
+/* Lead slider */
+.lead-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lead-value-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid #bfdbfe;
+  min-width: 56px;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.lead-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.lead-tick-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  min-width: 12px;
+  text-align: center;
+}
+
+.lead-slider {
   flex: 1;
-  min-height: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #3b82f6 0%, #3b82f6 calc((var(--lead-pct, 0)) * 100%), #e2e8f0 calc((var(--lead-pct, 0)) * 100%), #e2e8f0 100%);
+  outline: none;
+  cursor: pointer;
+}
+
+.lead-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.lead-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.5);
+}
+
+.lead-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: none;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+}
+
+.lead-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding: 0 2px;
+}
+
+.lead-tick-mark {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.lead-tick-mark:hover {
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.lead-tick-mark.active {
+  color: #2563eb;
+  background: #dbeafe;
+  font-weight: 700;
+}
+
+
+/* Chart card fills remaining space but never collapses below min-height */
+.chart-card {
+  flex: 1 1 260px;
+  /* Guaranteed minimum so the card stays visible at high zoom or small screens */
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -356,6 +462,7 @@
   .dashboard-grid {
     grid-template-columns: 1fr;
     height: auto;
+    min-height: unset;
   }
 
   .map-card {
@@ -364,6 +471,11 @@
 
   .right-column {
     height: auto;
+    overflow-y: visible;
+  }
+
+  .chart-card {
+    min-height: 300px;
   }
 }
 
@@ -395,4 +507,105 @@
 
 .mat-mdc-card-header {
   padding: 16px;
+}
+
+/* Chart card header: title + expand button side-by-side */
+.chart-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 8px;
+}
+
+.chart-expand-btn {
+  color: #64748b;
+  transition: color 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.chart-expand-btn:hover {
+  color: #3b82f6;
+  transform: scale(1.15);
+}
+
+/* Fullscreen overlay */
+.chart-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.chart-fullscreen-panel {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  width: min(92vw, 1100px);
+  height: min(85vh, 700px);
+  animation: panelSlideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+@keyframes panelSlideUp {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+.chart-fullscreen-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.chart-fullscreen-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.chart-fullscreen-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 2px 12px;
+}
+
+.chart-fullscreen-close {
+  margin-left: auto;
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.chart-fullscreen-close:hover {
+  color: #ef4444;
+}
+
+.chart-fullscreen-body {
+  flex: 1;
+  padding: 20px;
+  min-height: 0;
+  position: relative;
+}
+
+.chart-fullscreen-body canvas {
+  width: 100% !important;
+  height: 100% !important;
 }

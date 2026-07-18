@@ -61,24 +61,19 @@
       <mat-divider></mat-divider>
       <mat-card-content class="timescale-card-content">
 
-        <!-- Quy mô thời gian -->
+        <!-- Biến -->
         <div class="option-group">
-          <span class="option-label">Quy mô thời gian (Timescale)</span>
+          <span class="option-label">Biến</span>
           <div class="option-radio-group">
             <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="1" [checked]="selectedTimescale === 1"
-                (change)="onTimescaleRadioChange(1)">
-              1 tháng
+              <input type="radio" name="timescale" [value]="PR_T2_VARIABLES.forecast" [checked]="selectedVariable === PR_T2_VARIABLES.forecast"
+                (change)="onVariableRadioChange(PR_T2_VARIABLES.forecast)">
+              {{ isTemperature ? 'Nhiệt độ trung bình tháng' : 'Tổng lượng mưa tháng' }}
             </label>
             <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="3" [checked]="selectedTimescale === 3"
-                (change)="onTimescaleRadioChange(3)">
-              3 tháng
-            </label>
-            <label class="option-radio-label">
-              <input type="radio" name="timescale" [value]="6" [checked]="selectedTimescale === 6"
-                (change)="onTimescaleRadioChange(6)">
-              6 tháng
+              <input type="radio" name="timescale" [value]="PR_T2_VARIABLES.anomaly" [checked]="selectedVariable === PR_T2_VARIABLES.anomaly"
+                (change)="onVariableRadioChange(PR_T2_VARIABLES.anomaly)">
+              {{ isTemperature ? 'Dị thường nhiệt độ trung bình tháng' : 'Dị thường lượng mưa tháng' }}
             </label>
           </div>
         </div>
@@ -110,8 +105,16 @@
 
     <!-- Forecast Chart Card -->
     <mat-card class="dashboard-card chart-card">
-      <mat-card-header>
+      <mat-card-header class="chart-card-header">
         <mat-card-title>Biểu đồ dự báo 6 tháng</mat-card-title>
+        <button
+          *ngIf="selectedLocation && !isLoadingForecast"
+          mat-icon-button
+          class="chart-expand-btn"
+          title="Xem biểu đồ toàn màn hình"
+          (click)="expandChart()">
+          <mat-icon>open_in_full</mat-icon>
+        </button>
       </mat-card-header>
       <mat-divider></mat-divider>
       <mat-card-content class="chart-container-wrapper">
@@ -128,6 +131,26 @@
         </div>
       </mat-card-content>
     </mat-card>
+
+
+    <!-- Fullscreen Chart Overlay -->
+    <div
+      *ngIf="isChartExpanded"
+      class="chart-fullscreen-overlay"
+      (click)="closeChart($event)">
+      <div class="chart-fullscreen-panel" (click)="$event.stopPropagation()">
+        <div class="chart-fullscreen-header">
+          <span class="chart-fullscreen-title">Biểu đồ dự báo 6 tháng</span>
+          <span *ngIf="selectedProvinceName" class="chart-fullscreen-subtitle">{{ selectedProvinceName }}</span>
+          <button mat-icon-button class="chart-fullscreen-close" title="Đóng" (click)="closeChart()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="chart-fullscreen-body">
+          <canvas [id]="expandedCanvasId"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>

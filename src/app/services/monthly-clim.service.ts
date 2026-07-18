@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { MonthlyClimObservedResponse } from '../models/monthly-clim-observed-response.interface';
-import { MonthlyClimModelResponse } from '../models/monthly-clim-model-response.interface';
+import { MonthlyClimObservedResponse } from '../models/monthly-clim/monthly-clim-observed-response.interface';
+import { MonthlyClimModelResponse } from '../models/monthly-clim/monthly-clim-model-response.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({
