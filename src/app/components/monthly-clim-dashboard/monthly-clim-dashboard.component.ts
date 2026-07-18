@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/material/core';
 import * as L from 'leaflet';
 import 'leaflet.vectorgrid';
-import { Chart, registerables } from 'chart.js';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { MonthPickerHeaderComponent } from '../../shared/components/month-picker-header/month-picker-header.component';
 import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../../shared/adapters/vi-date.adapter';
 import { MonthlyClimDashboardConfig } from '../../models/monthly-clim/monthly-clim-dashboard-config.model';
@@ -55,6 +55,7 @@ export class MonthlyClimDashboard implements AfterViewInit {
   /** Unique ID for the canvas element — prevents DOM conflicts when both routes are cached */
   readonly canvasId = `climateChart-${Math.random().toString(36).slice(2)}`;
   readonly mapId = `vietnamMap-${Math.random().toString(36).slice(2)}`;
+  readonly expandedCanvasId = `forecastChartExpanded-${Math.random().toString(36).slice(2)}`;
 
   selectedLocation: { lat: number; lng: number } | null = null;
   selectedProvinceName: string | null = null;
@@ -76,11 +77,52 @@ export class MonthlyClimDashboard implements AfterViewInit {
   ) {}
 
   isLoadingClimate: boolean = false;
+  isChartExpanded: boolean = false;
   private climateChart: Chart | undefined;
   private lastClimateResponse: any = null;
+  private expandedChart: Chart | undefined;
+  private _escListener: ((e: KeyboardEvent) => void) | undefined;
 
   ngAfterViewInit() {
     this.initMap();
+  }
+
+  expandChart(): void {
+    if (!this.climateChart) return;
+    this.isChartExpanded = true;
+    this.cdr.detectChanges();
+
+    // Small delay to let Angular render the canvas in the DOM
+    setTimeout(() => {
+      const ctx = document.getElementById(this.expandedCanvasId) as HTMLCanvasElement;
+      if (!ctx || !this.climateChart) return;
+
+      const src = this.climateChart;
+      this.expandedChart = new Chart(ctx, {
+        type: (src.config as ChartConfiguration).type,
+        data: JSON.parse(JSON.stringify(src.data)), // deep-copy data
+        options: JSON.parse(JSON.stringify(src.options)), // deep-copy options
+      });
+    }, 50);
+
+    // Close on ESC
+    this._escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') this.closeChart();
+    };
+    document.addEventListener('keydown', this._escListener);
+  }
+
+  closeChart(event?: MouseEvent): void {
+    this.isChartExpanded = false;
+    if (this.expandedChart) {
+      this.expandedChart.destroy();
+      this.expandedChart = undefined;
+    }
+    if (this._escListener) {
+      document.removeEventListener('keydown', this._escListener);
+      this._escListener = undefined;
+    }
+    this.cdr.detectChanges();
   }
 
   private updateSelection(latlng: L.LatLng, provinceName: string | null = null): void {

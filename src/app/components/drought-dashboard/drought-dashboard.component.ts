@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/material/core';
 import * as L from 'leaflet';
 import 'leaflet.vectorgrid';
-import { Chart, registerables } from 'chart.js';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { MonthPickerHeaderComponent } from '../../shared/components/month-picker-header/month-picker-header.component';
 import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../../shared/adapters/vi-date.adapter';
 import { DroughtDashboardConfig } from '../../models/drought/drought-dashboard-config.model';
@@ -59,6 +59,7 @@ export class DroughtDashboard implements AfterViewInit {
   /** Unique ID for the canvas element — prevents DOM conflicts when both routes are cached */
   readonly canvasId = `forecastChart-${Math.random().toString(36).slice(2)}`;
   readonly mapId = `vietnamMap-${Math.random().toString(36).slice(2)}`;
+  readonly expandedCanvasId = `forecastChartExpanded-${Math.random().toString(36).slice(2)}`;
 
   selectedLocation: { lat: number; lng: number } | null = null;
   selectedProvinceName: string | null = null;
@@ -78,10 +79,13 @@ export class DroughtDashboard implements AfterViewInit {
   constructor(
     private readonly cdr: ChangeDetectorRef,
     private readonly injector: Injector,
-  ) {}
+  ) { }
 
   isLoadingForecast: boolean = false;
+  isChartExpanded: boolean = false;
   private forecastChart: Chart | undefined;
+  private expandedChart: Chart | undefined;
+  private _escListener: ((e: KeyboardEvent) => void) | undefined;
 
   /** Format selectedRefDate as yyyy-MM-dd for the API */
   private get selectedRefDateForApi(): string | undefined {
@@ -91,6 +95,44 @@ export class DroughtDashboard implements AfterViewInit {
   ngAfterViewInit() {
     this.initMap();
     this.loadRefDates();
+  }
+
+  expandChart(): void {
+    if (!this.forecastChart) return;
+    this.isChartExpanded = true;
+    this.cdr.detectChanges();
+
+    // Small delay to let Angular render the canvas in the DOM
+    setTimeout(() => {
+      const ctx = document.getElementById(this.expandedCanvasId) as HTMLCanvasElement;
+      if (!ctx || !this.forecastChart) return;
+
+      const src = this.forecastChart;
+      this.expandedChart = new Chart(ctx, {
+        type: (src.config as ChartConfiguration).type,
+        data: JSON.parse(JSON.stringify(src.data)), // deep-copy data
+        options: JSON.parse(JSON.stringify(src.options)), // deep-copy options
+      });
+    }, 50);
+
+    // Close on ESC
+    this._escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') this.closeChart();
+    };
+    document.addEventListener('keydown', this._escListener);
+  }
+
+  closeChart(event?: MouseEvent): void {
+    this.isChartExpanded = false;
+    if (this.expandedChart) {
+      this.expandedChart.destroy();
+      this.expandedChart = undefined;
+    }
+    if (this._escListener) {
+      document.removeEventListener('keydown', this._escListener);
+      this._escListener = undefined;
+    }
+    this.cdr.detectChanges();
   }
 
   private loadRefDates(): void {

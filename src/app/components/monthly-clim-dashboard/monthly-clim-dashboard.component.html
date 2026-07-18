@@ -107,8 +107,16 @@
 
     <!-- Forecast Chart Card -->
     <mat-card class="dashboard-card chart-card">
-      <mat-card-header>
+      <mat-card-header class="chart-card-header">
         <mat-card-title>Biểu đồ khí hậu 12 tháng</mat-card-title>
+        <button
+          *ngIf="selectedLocation && !isLoadingClimate"
+          mat-icon-button
+          class="chart-expand-btn"
+          title="Xem biểu đồ toàn màn hình"
+          (click)="expandChart()">
+          <mat-icon>open_in_full</mat-icon>
+        </button>
       </mat-card-header>
       <mat-divider></mat-divider>
       <mat-card-content class="chart-container-wrapper">
@@ -125,6 +133,25 @@
         </div>
       </mat-card-content>
     </mat-card>
+
+    <!-- Fullscreen Chart Overlay -->
+    <div
+      *ngIf="isChartExpanded"
+      class="chart-fullscreen-overlay"
+      (click)="closeChart($event)">
+      <div class="chart-fullscreen-panel" (click)="$event.stopPropagation()">
+        <div class="chart-fullscreen-header">
+          <span class="chart-fullscreen-title">Biểu đồ dự báo 6 tháng</span>
+          <span *ngIf="selectedProvinceName" class="chart-fullscreen-subtitle">{{ selectedProvinceName }}</span>
+          <button mat-icon-button class="chart-fullscreen-close" title="Đóng" (click)="closeChart()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="chart-fullscreen-body">
+          <canvas [id]="expandedCanvasId"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
