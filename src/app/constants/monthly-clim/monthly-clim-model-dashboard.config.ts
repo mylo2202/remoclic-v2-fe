@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core';
-import { MonthlyClimDashboardConfig } from '../models/monthly-clim-dashboard-config.model';
-import { MonthlyClimService } from '../services/monthly-clim.service';
+import { MonthlyClimDashboardConfig } from '../../models/monthly-clim/monthly-clim-dashboard-config.model';
+import { MonthlyClimService } from '../../services/monthly-clim.service';
 import { MONTHLY_CLIM_VARIABLES } from './monthly-clim-variables.constant';
 
 export const MONTHLY_CLIM_MODEL_DASHBOARD_CONFIG: MonthlyClimDashboardConfig = {

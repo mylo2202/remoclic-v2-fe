@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DroughtProbabilityForecastResponse } from '../models/drought-probability-forecast-response.interface';
-import { DroughtEventForecastResponse } from '../models/drought-event-forecast-response.interface';
+import { DroughtProbabilityForecastResponse } from '../models/drought/drought-probability-forecast-response.interface';
+import { DroughtEventForecastResponse } from '../models/drought/drought-event-forecast-response.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({

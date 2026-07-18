@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core';
-import { PrT2DashboardConfig } from '../models/pr-t2-dashboard-config.model';
-import { PrT2ForecastService } from '../services/pr-t2-forecast.service';
+import { PrT2DashboardConfig } from '../../models/pr-t2/pr-t2-dashboard-config.model';
+import { PrT2ForecastService } from '../../services/pr-t2-forecast.service';
 import { PR_T2_VARIABLES } from './pr-t2-variables.constant';
 
 export const PR_T2_TEMPERATURE_DASHBOARD_CONFIG: PrT2DashboardConfig = {

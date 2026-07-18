@@ -1,11 +1,18 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Injector, Input } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  Injector,
+  Input,
+  OnInit,
+} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,12 +20,17 @@ import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/mat
 import * as L from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Chart, registerables } from 'chart.js';
-import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
-import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
-import { MonthlyClimDashboardConfig } from '../models/monthly-clim-dashboard-config.model';
-import { initLeafletMarkerIcon, loadProvinceGeoJson } from '../shared/utils/dashboard-helpers';
-import { MONTHLY_CLIM_OBSERVED_DASHBOARD_CONFIG } from '../constants/monthly-clim-observed-dashboard.config';
-import { MONTHLY_CLIM_VARIABLES } from '../constants/monthly-clim-variables.constant';
+import { MonthPickerHeaderComponent } from '../../shared/components/month-picker-header/month-picker-header.component';
+import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../../shared/adapters/vi-date.adapter';
+import { PrT2DashboardConfig } from '../../models/pr-t2/pr-t2-dashboard-config.model';
+import {
+  formatRefDate,
+  initLeafletMarkerIcon,
+  isRefDateAvailable,
+  loadProvinceGeoJson,
+} from '../../shared/utils/dashboard-helpers';
+import { PR_T2_TEMPERATURE_DASHBOARD_CONFIG } from '../../constants/pr-t2/pr-t2-temperature-dashboard.config';
+import { PR_T2_VARIABLES } from '../../constants/pr-t2/pr-t2-variables.constant';
 
 Chart.register(...registerables);
 
@@ -42,18 +54,18 @@ Chart.register(...registerables);
     { provide: DateAdapter, useClass: ViDateAdapter },
     { provide: MAT_DATE_FORMATS, useValue: VI_MONTH_DATE_FORMATS },
   ],
-  templateUrl: './monthly-clim-dashboard.component.html',
-  styleUrl: './monthly-clim-dashboard.component.css',
+  templateUrl: './pr-t2-dashboard.component.html',
+  styleUrl: './pr-t2-dashboard.component.css',
 })
-export class MonthlyClimDashboard implements AfterViewInit {
+export class PrT2Dashboard implements OnInit, AfterViewInit {
   // defaults to temperature
-  @Input() config: MonthlyClimDashboardConfig = MONTHLY_CLIM_OBSERVED_DASHBOARD_CONFIG;
+  @Input() config: PrT2DashboardConfig = PR_T2_TEMPERATURE_DASHBOARD_CONFIG;
 
   private map: L.Map | undefined;
   private selectedMarker: L.Marker | undefined;
 
   /** Unique ID for the canvas element — prevents DOM conflicts when both routes are cached */
-  readonly canvasId = `climateChart-${Math.random().toString(36).slice(2)}`;
+  readonly canvasId = `forecastChart-${Math.random().toString(36).slice(2)}`;
   readonly mapId = `vietnamMap-${Math.random().toString(36).slice(2)}`;
 
   selectedLocation: { lat: number; lng: number } | null = null;
@@ -62,25 +74,74 @@ export class MonthlyClimDashboard implements AfterViewInit {
   isMouseOnMap: boolean = false;
   currentZoom: number = 6;
 
+  availableRefDates: Date[] = []; // parsed Date objects from API
+  selectedRefDate: Date | null = null; // currently selected month
+  refDateControl = new FormControl<Date | null>(null);
+  isLoadingRefDates: boolean = false;
+  isTemperature: boolean = true;
+
   /** Reference to the custom header — passed to [calendarHeaderComponent] */
   readonly monthPickerHeader = MonthPickerHeaderComponent;
 
-  protected readonly MONTHLY_CLIM_VARIABLES = MONTHLY_CLIM_VARIABLES;
-  selectedVariable: string = MONTHLY_CLIM_VARIABLES.temperature;
-  selectedLead: number = 1;
-  readonly leadOptions: number[] = [1, 2, 3, 4, 5, 6];
+  protected readonly PR_T2_VARIABLES = PR_T2_VARIABLES;
+  selectedVariable: string = PR_T2_VARIABLES.forecast;
 
   constructor(
     private readonly cdr: ChangeDetectorRef,
     private readonly injector: Injector,
   ) {}
 
-  isLoadingClimate: boolean = false;
-  private climateChart: Chart | undefined;
-  private lastClimateResponse: any = null;
+  isLoadingForecast: boolean = false;
+  private forecastChart: Chart | undefined;
+  private lastForecastResponse: any = null;
+
+  /** Format selectedRefDate as yyyy-MM-dd for the API */
+  private get selectedRefDateForApi(): string | undefined {
+    return formatRefDate(this.selectedRefDate);
+  }
+
+  /** Only allow months that exist in availableRefDates */
+  refDateFilter = (date: Date | null): boolean => {
+    return isRefDateAvailable(date, this.availableRefDates);
+  };
 
   ngAfterViewInit() {
     this.initMap();
+    this.loadRefDates();
+  }
+
+  private loadRefDates(): void {
+    if (!this.config.fetchRefDates) {
+      this.isLoadingRefDates = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.isLoadingRefDates = true;
+    this.config.fetchRefDates(this.injector).subscribe({
+      next: (res) => {
+        // API returns strings like '2026-05-01'
+        this.availableRefDates = res
+          .map((date) => new Date(date))
+          .filter((date) => !Number.isNaN(date.getTime()));
+        // Pre-select the first (latest) available date
+        if (this.availableRefDates.length > 0) {
+          this.selectedRefDate = this.availableRefDates[0];
+          this.refDateControl.setValue(this.selectedRefDate);
+        }
+        this.isLoadingRefDates = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching ref dates:', err);
+        this.isLoadingRefDates = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  ngOnInit() {
+    this.isTemperature = this.config.isTemperature;
   }
 
   private updateSelection(latlng: L.LatLng, provinceName: string | null = null): void {
@@ -100,22 +161,25 @@ export class MonthlyClimDashboard implements AfterViewInit {
     // Trigger Angular change detection manually because Leaflet runs outside Angular's Zone.
     this.cdr.detectChanges();
 
-    // Fetch climate data whenever selection changes
-    this.fetchClimateData(latlng.lat, latlng.lng);
+    // Fetch forecast data whenever selection changes
+    this.fetchForecastData(latlng.lat, latlng.lng);
   }
 
   onVariableRadioChange(value: string): void {
     this.selectedVariable = value;
-    if (this.lastClimateResponse) {
-      const chartData = this.config.transformData(this.lastClimateResponse, this.selectedVariable);
+    if (this.lastForecastResponse) {
+      const chartData = this.config.transformData(this.lastForecastResponse, this.selectedVariable);
       this.updateChart(chartData);
     }
   }
 
-  onLeadChange(lead: number): void {
-    this.selectedLead = lead;
+  /** Called when user picks a month in the datepicker popup */
+  onMonthSelected(date: Date, picker: any): void {
+    this.selectedRefDate = date;
+    this.refDateControl.setValue(date);
+    picker.close();
     if (this.selectedLocation) {
-      this.fetchClimateData(this.selectedLocation.lat, this.selectedLocation.lng);
+      this.fetchForecastData(this.selectedLocation.lat, this.selectedLocation.lng);
     }
   }
 
@@ -158,22 +222,21 @@ export class MonthlyClimDashboard implements AfterViewInit {
     });
   }
 
-  private fetchClimateData(lat: number, lng: number): void {
-    this.isLoadingClimate = true;
+  private fetchForecastData(lat: number, lng: number): void {
+    this.isLoadingForecast = true;
     this.cdr.detectChanges();
 
-    const lead = this.config.showLeadSlider ? this.selectedLead : undefined;
-    this.config.fetchData(this.injector, lat, lng, lead).subscribe({
+    this.config.fetchData(this.injector, lat, lng, this.selectedRefDateForApi).subscribe({
       next: (response) => {
-        this.lastClimateResponse = response;
+        this.lastForecastResponse = response;
         const chartData = this.config.transformData(response, this.selectedVariable);
         this.updateChart(chartData);
-        this.isLoadingClimate = false;
+        this.isLoadingForecast = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching climate data:', err);
-        this.isLoadingClimate = false;
+        console.error('Error fetching forecast data:', err);
+        this.isLoadingForecast = false;
         this.cdr.detectChanges();
       },
     });
@@ -185,16 +248,16 @@ export class MonthlyClimDashboard implements AfterViewInit {
 
     // const datasetLabel = this.config.getYAxisTitle(this.selectedVariable);
 
-    if (this.climateChart) {
-      this.climateChart.data.labels = data.labels;
-      this.climateChart.data.datasets = data.datasets;
-      // const yScale = this.climateChart.options.scales?.['y'] as any;
+    if (this.forecastChart) {
+      this.forecastChart.data.labels = data.labels;
+      this.forecastChart.data.datasets = data.datasets;
+      // const yScale = this.forecastChart.options.scales?.['y'] as any;
       // if (yScale?.title) {
       //   yScale.title.text = datasetLabel;
       // }
-      this.climateChart.update();
+      this.forecastChart.update();
     } else {
-      this.climateChart = new Chart(ctx, {
+      this.forecastChart = new Chart(ctx, {
         type: 'line',
         data: data,
         options: {
@@ -214,7 +277,7 @@ export class MonthlyClimDashboard implements AfterViewInit {
                     label += ': ';
                   }
                   if (context.parsed.y !== null) {
-                    label += this.config.valueFormatter(context.parsed.y);
+                    label += this.config.valueFormatter(context.parsed.y, this.selectedVariable);
                   }
                   return label;
                 },
@@ -231,12 +294,12 @@ export class MonthlyClimDashboard implements AfterViewInit {
               //   text: datasetLabel,
               // },
             },
-            // x: {
-            //   title: {
-            //     display: true,
-            //     text: 'Khí hậu 12 tháng',
-            //   },
-            // },
+            x: {
+              title: {
+                display: true,
+                text: 'Dự báo cho 6 tháng từ thời điểm dự báo',
+              },
+            },
           },
         },
       });

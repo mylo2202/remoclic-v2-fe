@@ -13,16 +13,16 @@ import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/mat
 import * as L from 'leaflet';
 import 'leaflet.vectorgrid';
 import { Chart, registerables } from 'chart.js';
-import { MonthPickerHeaderComponent } from '../shared/components/month-picker-header/month-picker-header.component';
-import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../shared/adapters/vi-date.adapter';
-import { DroughtDashboardConfig } from '../models/drought-dashboard-config.model';
-import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../constants/drought-probability-dashboard.config';
+import { MonthPickerHeaderComponent } from '../../shared/components/month-picker-header/month-picker-header.component';
+import { VI_MONTH_DATE_FORMATS, ViDateAdapter } from '../../shared/adapters/vi-date.adapter';
+import { DroughtDashboardConfig } from '../../models/drought/drought-dashboard-config.model';
+import { DROUGHT_PROBABILITY_DASHBOARD_CONFIG } from '../../constants/drought/drought-probability-dashboard.config';
 import {
   formatRefDate,
   initLeafletMarkerIcon,
   isRefDateAvailable,
   loadProvinceGeoJson,
-} from '../shared/utils/dashboard-helpers';
+} from '../../shared/utils/dashboard-helpers';
 
 Chart.register(...registerables);
 

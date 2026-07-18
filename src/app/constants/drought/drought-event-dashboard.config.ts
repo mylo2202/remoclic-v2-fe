@@ -1,6 +1,6 @@
 import { Injector } from '@angular/core';
-import { DroughtDashboardConfig } from '../models/drought-dashboard-config.model';
-import { DroughtForecastService } from '../services/drought-forecast.service';
+import { DroughtDashboardConfig } from '../../models/drought/drought-dashboard-config.model';
+import { DroughtForecastService } from '../../services/drought-forecast.service';
 
 export const DROUGHT_EVENT_DASHBOARD_CONFIG: DroughtDashboardConfig = {
   title: 'Dự báo sự kiện hạn theo các cấp và quy mô thời gian',
